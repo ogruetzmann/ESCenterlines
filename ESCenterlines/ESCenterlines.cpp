@@ -7,9 +7,26 @@ CESCenterlines::CESCenterlines()
 			  MY_PLUGIN_DEVELOPER,
 			  MY_PLUGIN_COPYRIGHT)
 {
+	RegisterDisplayType("ES Centerlines", false, true, false, false);
+	GetSystemTimeAsFileTime(&ActiveRunwaysUpdateTime);
 }
 
 
 CESCenterlines::~CESCenterlines()
 {
 }
+
+EuroScopePlugIn::CRadarScreen * CESCenterlines::OnRadarScreenCreated(const char * sDisplayName, 
+																	 bool NeedRadarContent, 
+																	 bool GeoReferenced, 
+																	 bool CanBeSaved, 
+																	 bool CanBeCreated)
+{
+	return new CESCenterlinesScreen(ActiveRunwaysUpdateTime);
+}
+
+void CESCenterlines::OnAirportRunwayActivityChanged()
+{
+	GetSystemTimeAsFileTime(&ActiveRunwaysUpdateTime);
+}
+
