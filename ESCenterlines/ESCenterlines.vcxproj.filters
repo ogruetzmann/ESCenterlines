@@ -27,10 +27,16 @@
     <ClCompile Include="ESCenterlinesScreen.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Runway.cpp">
+    <ClCompile Include="Coordinate.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="MyPosition.cpp">
+    <ClCompile Include="Line.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="RangeTick.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Runway.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -170,10 +176,16 @@
     <ClInclude Include="ESCenterlinesScreen.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Runway.h">
+    <ClInclude Include="Coordinate.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="MyPosition.h">
+    <ClInclude Include="Line.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="RangeTick.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Runway.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

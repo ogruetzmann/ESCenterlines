@@ -8,119 +8,64 @@ CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime) : ActiveRunwaysUpda
 
 CESCenterlinesScreen::~CESCenterlinesScreen()
 {
-	if (Runways)
-	{
-		Runways->clear();
-		delete Runways;
-	}
 }
 
 void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 {
-	bool runwayUpdate = false;
-	// Check if the runway configuration was updated
-	if (ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
-		|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime)
-	{
-		runwayUpdate = true;
-		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime;
-	}
-
 	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
+		DrawExtendedCenterlines(hDC);
+
+
+	if (IsDataUpdated())
 	{
-		if (!Runways)
-		{
-			return;
-		}
-
-		bool displayAll = false;
-		HGDIOBJ Pen = CreatePen(PS_SOLID, 1, RGB(150,150,150));
-		HGDIOBJ oldPen = SelectObject(hDC, Pen);
-		LPPOINT pt = 0;
-		GeographicLib::Constants::nauticalmile();
-		
-		for (CRunway &rwy : *Runways)
-		{
-			POINT start1, start2, end1, end2;
-			static GeographicLib::Geodesic g(GeographicLib::Geodesic::WGS84());
-			EuroScopePlugIn::CPosition pos;
-
-			if (rwy.GetActive(0) || displayAll)
-			{
-				rwy.GetThreshold(pos, 0);
-				start1 = ConvertCoordFromPositionToPixel(pos);
-				g.Direct(pos.m_Latitude, pos.m_Longitude, rwy.GetHeading(0), -20 * GeographicLib::Constants::nauticalmile(), pos.m_Latitude, pos.m_Longitude);
-				end1 = ConvertCoordFromPositionToPixel(pos);
-
-				MoveToEx(hDC, start1.x, start1.y, pt);
-				LineTo(hDC, end1.x, end1.y);
-			}
-
-			if (rwy.GetActive(1) || displayAll)
-			{
-				rwy.GetThreshold(pos, 1);
-				start2 = ConvertCoordFromPositionToPixel(pos);
-				g.Direct(pos.m_Latitude, pos.m_Longitude, rwy.GetHeading(1), -20 * GeographicLib::Constants::nauticalmile(), pos.m_Latitude, pos.m_Longitude);
-				end2 = ConvertCoordFromPositionToPixel(pos);
-
-				MoveToEx(hDC, start2.x, start2.y, pt);
-				LineTo(hDC, end2.x, end2.y);
-			}
-		}
-		SelectObject(hDC, oldPen);
-	}
-
-	if (runwayUpdate)
-	{
-		LoadRunways();
+		LoadRunwayData();
+		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
+		RefreshMapContent();
 	}
 }
 
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
-	LoadRunways();
+	LoadRunwayData();
 }
 
-void CESCenterlinesScreen::LoadRunways()
+void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 {
-	LoadRunwaysFromSectorfile();
-	LoadRunwayUserSettings();
-
-	RefreshMapContent();
+	/*HGDIOBJ pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
+	HGDIOBJ old_pen = SelectObject(hDC, pen);
+	MoveToEx(hDC, 100, 100, 0);
+	LineTo(hDC, 200, 200);
+	SelectObject(hDC, old_pen);*/
 }
 
-int CESCenterlinesScreen::LoadRunwaysFromSectorfile()
+void CESCenterlinesScreen::LoadRunwayData()
 {
-	if (!Runways)
-	{
-		if (!(Runways = new std::vector<CRunway>))
-		{
-			return 0;
-		}
-	}
-	Runways->clear();
-
 	for (EuroScopePlugIn::CSectorElement se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
 	{
-		CRunway rwy;
-		EuroScopePlugIn::CPosition position;
+		CRunway runway1(se, 0);
+		LoadRunwayUserSettings(runway1);
+		CRunway runway2(se, 1);
+		LoadRunwayUserSettings(runway2);
 
-		rwy.SetAirportName(std::string(se.GetAirportName()));
-		for (int i = 0; i < 2; ++i)
-		{
-			se.GetPosition(&position, i);
-			rwy.SetThreshold(position, i);
-			rwy.SetDesignator(se.GetRunwayName(i), i);
-			rwy.SetActive(se.IsElementActive(false, i), i);
-		}
-		Runways->push_back(rwy);
+		// ToDo: Save data elsewhere
 	}
-	return Runways->size();
 }
 
-int CESCenterlinesScreen::LoadRunwayUserSettings()
+void CESCenterlinesScreen::LoadRunwayUserSettings(CRunway & runway)
 {
-	return 0;
+}
+
+bool CESCenterlinesScreen::IsDataUpdated() const
+{
+	if (ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
+		|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime)
+		return true;
+	return false;
+}
+
+void CESCenterlinesScreen::DisplayMessage(std::string message)
+{
+	GetPlugIn()->DisplayUserMessage("ES Centerlines", "Debug", message.c_str(), true, true, false, false, false);
 }

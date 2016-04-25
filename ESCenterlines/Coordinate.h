@@ -2,13 +2,12 @@
 #include <Windows.h>
 #include "EuroScopePlugIn.h"
 
-
-class CMyPosition :
+class CCoordinate :
 	public EuroScopePlugIn::CPosition
 {
 public:
-	CMyPosition();
-	CMyPosition(double lat, double lon);
-	virtual ~CMyPosition();
+	CCoordinate();
+	CCoordinate(double latitude, double longitude);
+	virtual ~CCoordinate();
 };
 

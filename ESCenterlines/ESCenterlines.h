@@ -1,7 +1,5 @@
 #pragma once
 #include <Windows.h>
-#include <sstream>
-#include <iomanip>
 #include "EuroScopePlugIn.h"
 #include "ESCenterlinesScreen.h"
 

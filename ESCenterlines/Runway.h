@@ -1,39 +1,29 @@
 #pragma once
 #include <Windows.h>
 #include <string>
-#include <sstream>
-#include <EuroScopePlugIn.h>
-#include <GeographicLib\Math.hpp>
-#include <GeographicLib\GeodesicLine.hpp>
+#include "EuroScopePlugIn.h"
+#include "Coordinate.h"
+
 
 class CRunway
 {
-private:
-	std::string sAirportName;
-	std::string sRunwayDesignator[2];
-	GeographicLib::Math::real RunwayThreshold_latitude[2] = { 0.0, 0.0 };
-	GeographicLib::Math::real RunwayThreshold_longitude[2] = { 0.0, 0.0 };
-	GeographicLib::Math::real rRunwayHeading[2] = { 0.0, 0.0 };
-	bool isActive[2] = { false, false };
-
 public:
+	CCoordinate threshold = { 0.0, 0.0 };
+	CCoordinate stop_end = { 0.0, 0.0 };
+	int sectorfile_approach_course = 0;
+	std::string runway_designator;
+	std::string final_approach_fix;
+	std::string airport_designator;
+	bool is_active = false;
+
 	CRunway();
+	CRunway(EuroScopePlugIn::CSectorElement & se, int index);
 	virtual ~CRunway();
 
-	bool CalculateRunwayHeading();
+	void SetFinalApproachFix(std::string & faf);
 
-	const std::string & GetAirportName() const;
-	const std::string & GetDesignator(int index) const;
-	void GetThreshold(double & latitude, double & longitude, int index);
-	void GetThreshold(EuroScopePlugIn::CPosition & position, int index);
-	double GetHeading(int index) const;
-	bool GetActive(int index) const;
-
-	void SetAirportName(const std::string & name);
-	void SetDesignator(const std::string & designator, int index);
-	void SetThreshold(double latitude, double longitude, int index);
-	void SetThreshold(EuroScopePlugIn::CPosition & position, int index);
-	void SetActive(bool active, int index);
+private:
+	void SetAirportString(const char * designator);
 
 };
 

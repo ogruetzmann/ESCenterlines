@@ -13,5 +13,4 @@
 97.107.135.245 USA-E
 98.175.203.135 USA-SE
 50.116.3.203 USA-W
-185.93.245.200 UAE
 sweatbox.vatsim.net SweatBox
