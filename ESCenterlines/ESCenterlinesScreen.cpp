@@ -26,8 +26,6 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime;
 	}
 
-	std::string activeonly = GetPlugIn()->GetDataFromSettings("m_ExtendedCenterlinActiveArr");
-
 	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
 	{
 		if (!Runways)
@@ -85,11 +83,19 @@ void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 
 void CESCenterlinesScreen::LoadRunways()
 {
+	LoadRunwaysFromSectorfile();
+	LoadRunwayUserSettings();
+
+	RefreshMapContent();
+}
+
+int CESCenterlinesScreen::LoadRunwaysFromSectorfile()
+{
 	if (!Runways)
 	{
 		if (!(Runways = new std::vector<CRunway>))
 		{
-			return;
+			return 0;
 		}
 	}
 	Runways->clear();
@@ -111,6 +117,10 @@ void CESCenterlinesScreen::LoadRunways()
 		}
 		Runways->push_back(rwy);
 	}
+	return Runways->size();
+}
 
-	RefreshMapContent();
+int CESCenterlinesScreen::LoadRunwayUserSettings()
+{
+	return 0;
 }

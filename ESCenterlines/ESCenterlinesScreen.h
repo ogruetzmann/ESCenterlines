@@ -34,5 +34,7 @@ public:
 
 private:
 	void LoadRunways();
+	int LoadRunwaysFromSectorfile();
+	int LoadRunwayUserSettings();
 };
 
