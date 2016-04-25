@@ -3,6 +3,8 @@
 
 version.txt
 ipaddr.txt
+euroscope_sector_providers.txt
+SectorFileProviderDescriptor.txt
 
 # User-specific files
 *.suo
