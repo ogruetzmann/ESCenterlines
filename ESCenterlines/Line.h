@@ -4,11 +4,11 @@
 class CLine
 {
 public:
-	CCoordinate p1;
-	CCoordinate p2;
+	CCoordinate c1;
+	CCoordinate c2;
 
 	CLine();
-	CLine(CCoordinate & point1, CCoordinate & point2);
+	CLine(CCoordinate & coordinate1, CCoordinate & coordinate2);
 	virtual ~CLine();
 };
 

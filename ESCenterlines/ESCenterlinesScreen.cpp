@@ -18,7 +18,7 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 	if (IsDataUpdated())
 	{
-		LoadRunwayData();
+		CreateCenterlines();
 		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 		RefreshMapContent();
 	}
@@ -26,35 +26,59 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
-	LoadRunwayData();
+	CreateCenterlines();
 }
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 {
-	/*HGDIOBJ pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
-	HGDIOBJ old_pen = SelectObject(hDC, pen);
-	MoveToEx(hDC, 100, 100, 0);
-	LineTo(hDC, 200, 200);
-	SelectObject(hDC, old_pen);*/
+	auto pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
+	auto old_pen = SelectObject(hDC, pen);
+
+	for (auto & line : lines)
+	{
+		auto pp1 = ConvertCoordFromPositionToPixel(line->c1);
+		auto pp2 = ConvertCoordFromPositionToPixel(line->c2);
+		MoveToEx(hDC, pp1.x, pp1.y, nullptr);
+		LineTo(hDC, pp2.x, pp2.y);
+	}
+	SelectObject(hDC, old_pen);
 }
 
 void CESCenterlinesScreen::LoadRunwayData()
 {
-	for (EuroScopePlugIn::CSectorElement se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
+	runway_settings.clear();
+	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
 	{
-		CRunway runway1(se, 0);
-		LoadRunwayUserSettings(runway1);
-		CRunway runway2(se, 1);
-		LoadRunwayUserSettings(runway2);
-
-		// ToDo: Save data elsewhere
+		for (auto i = 0; i < 2; ++i)
+		{
+			std::unique_ptr<CRunway> runway = CRunway::CreateRunway(se, i);
+			if (runway)
+				runway_settings.push_back(std::move(runway));
+		}
 	}
 }
 
-void CESCenterlinesScreen::LoadRunwayUserSettings(CRunway & runway)
+void CESCenterlinesScreen::LoadRunwayUserSettings(CRunway * runway)
 {
+}
+
+void CESCenterlinesScreen::CreateCenterlines()
+{
+	LoadRunwayData();
+	LoadRunwayUserSettings(nullptr);
+
+	lines.clear();
+	static GeographicLib::Geodesic gd(GeographicLib::Geodesic::WGS84());
+	for (auto & rs : runway_settings)
+	{
+		CCoordinate c1 { rs->threshold.m_Latitude, rs->threshold.m_Longitude };
+		CCoordinate c2;
+
+		gd.Direct(c1.m_Latitude, c1.m_Longitude, rs->GetApproachCourse(CourseType::sectorfile), InNM(-20), c2.m_Latitude, c2.m_Longitude);
+		lines.push_back(std::make_unique<CLine>(CLine(c1, c2)));
+	}
 }
 
 bool CESCenterlinesScreen::IsDataUpdated() const
