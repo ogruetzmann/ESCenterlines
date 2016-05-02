@@ -25,6 +25,7 @@ public:
 	{
 		delete this;
 	}
+	bool OnCompileCommand(const char * sCommandLine);
 
 	inline double InNM(double distance_in_nautical_miles)
 	{
@@ -32,17 +33,22 @@ public:
 	}
 
 private:
+	const char * DISPLAY_CENTERLINES = "Display_Centerlines";
+	const char * DISPLAY_ACTIVE = "Display Active";
 	const FILETIME & ActiveRunwaysUpdateTime;
 	FILETIME ActiveRunwaysLastUpdateTime;
 	std::vector <std::unique_ptr<CRunway>> runways;
 	std::vector <std::unique_ptr<CLine>> lines;
 	CGeographic geographic;
+	bool display_centerlines { true };
+	bool display_active { true };
 
 	void DrawExtendedCenterlines(HDC & hdc);
 
 	void CalculateCenterline(CRunway & runway);
 	void CalculateRangeTicks(CRunway & runway);
 	void CreateCenterlines();
+	void InitAsrSettings();
 	void LoadRunwayData();
 	void LoadRunwayUserData();
 	void RefreshData();

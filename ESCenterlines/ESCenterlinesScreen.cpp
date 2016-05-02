@@ -26,15 +26,34 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
+	InitAsrSettings();
 	RefreshData();
 	RefreshMapContent();
+}
+
+bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
+{
+	if (!strcmp(sCommandLine, ".cline active"))
+	{
+		display_active = !display_active;
+		RefreshData();
+		RefreshMapContent();
+		return true;
+	}
+	if (!strcmp(sCommandLine, ".cline display"))
+	{
+		display_centerlines = !display_centerlines;
+		RefreshData();
+		RefreshMapContent();
+		return true;
+	}
+	return false;
 }
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 {
 	auto pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
 	auto old_pen = SelectObject(hDC, pen);
-
 	for (auto & line : lines)
 	{
 		auto pp1 = ConvertCoordFromPositionToPixel(line->c1);
@@ -47,7 +66,7 @@ void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 
 void CESCenterlinesScreen::CalculateCenterline(CRunway & runway)
 {
-	double pos = 0.0;
+	auto pos = 0.0;
 	for (auto & cl : runway.extended_centerline.centerline_elements)
 	{
 		auto pattern_length = cl.tick_length + cl.gap_length;
@@ -58,8 +77,8 @@ void CESCenterlinesScreen::CalculateCenterline(CRunway & runway)
 				line_start += cl.gap_length;
 			auto line_end = line_start + cl.tick_length;
 			
-			CCoordinate c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_start)));
-			CCoordinate c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_end)));
+			auto c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_start)));
+			auto c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_end)));
 			lines.push_back(std::make_unique<CLine>(c1, c2));
 		}
 		pos += pattern_length * cl.length;
@@ -70,21 +89,48 @@ void CESCenterlinesScreen::CalculateRangeTicks(CRunway & runway)
 {
 	for (auto & rt : runway.extended_centerline.range_ticks)
 	{
-
+		auto tick_azimuth_left = runway.GetApproachCourse() - 90;
+		auto c_base = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(rt.distance_thr)));
+		if (rt.direction == Direction::left || rt.direction == Direction::both)
+		{
+			auto c1_left = geographic.GetCoordinate(c_base, tick_azimuth_left, InNM(rt.distance_cl));
+			auto c2_left = geographic.GetCoordinate(c1_left, tick_azimuth_left, InNM(rt.length));
+			lines.push_back(std::make_unique<CLine>(c1_left, c2_left));
+		}
+		if (rt.direction == Direction::right || rt.direction == Direction::both)
+		{
+			auto c1_right = geographic.GetCoordinate(c_base, tick_azimuth_left, -InNM(rt.distance_cl));
+			auto c2_right = geographic.GetCoordinate(c1_right, tick_azimuth_left, -InNM(rt.length));
+			lines.push_back(std::make_unique<CLine>(c1_right, c2_right));
+		}
 	}
 }
 
 void CESCenterlinesScreen::CreateCenterlines()
 {
 	lines.clear();
+	if (!display_centerlines)
+		return;
 	for (auto & rs : runways)
 	{
-		if (!rs->is_active)
+		if (display_active && !rs->is_active)
 			continue;
 
 		CalculateCenterline(*rs);
 		CalculateRangeTicks(*rs);
 	}
+}
+
+void CESCenterlinesScreen::InitAsrSettings()
+{
+	if (!(GetDataFromAsr(DISPLAY_CENTERLINES)))
+		SaveDataToAsr(DISPLAY_CENTERLINES, DISPLAY_CENTERLINES, "1");
+	if (!strcmp(GetDataFromAsr(DISPLAY_CENTERLINES), "0"))
+			display_centerlines = false;
+	if (!(GetDataFromAsr(DISPLAY_ACTIVE)))
+		SaveDataToAsr(DISPLAY_ACTIVE, DISPLAY_ACTIVE, "1");
+	if (!strcmp(GetDataFromAsr(DISPLAY_ACTIVE), "0"))
+		display_active = false;
 }
 
 void CESCenterlinesScreen::LoadRunwayData()
