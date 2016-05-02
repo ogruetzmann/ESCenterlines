@@ -40,8 +40,8 @@ private:
 
 	void DrawExtendedCenterlines(HDC & hdc);
 
-	void CalculateCenterline(const CRunway & runway);
-	void CalculateRangeTicks(const CRunway & runway);
+	void CalculateCenterline(CRunway & runway);
+	void CalculateRangeTicks(CRunway & runway);
 	void CreateCenterlines();
 	void LoadRunwayData();
 	void LoadRunwayUserData();

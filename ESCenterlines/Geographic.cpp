@@ -2,7 +2,8 @@
 
 
 
-CGeographic::CGeographic() : geodesic(GeographicLib::Geodesic::WGS84())
+CGeographic::CGeographic() 
+	: geodesic(GeographicLib::Geodesic::WGS84())
 {
 }
 

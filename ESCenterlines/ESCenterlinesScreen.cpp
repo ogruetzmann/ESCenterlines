@@ -20,7 +20,6 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 	if (IsDataUpdated())
 	{
 		RefreshData();
-		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 		RefreshMapContent();
 	}
 }
@@ -28,6 +27,7 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
 	RefreshData();
+	RefreshMapContent();
 }
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
@@ -45,19 +45,28 @@ void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 	SelectObject(hDC, old_pen);
 }
 
-void CESCenterlinesScreen::CalculateCenterline(const CRunway & runway)
+void CESCenterlinesScreen::CalculateCenterline(CRunway & runway)
 {
+	double pos = 0.0;
 	for (auto & cl : runway.extended_centerline.centerline_elements)
 	{
-		double pattern_length = cl.tick_length + cl.gap_length;
+		auto pattern_length = cl.tick_length + cl.gap_length;
 		for (auto i = 0; i < cl.length; ++i)
 		{
-
+			auto line_start = i * pattern_length + pos;
+			if (cl.starts_with_gap)
+				line_start += cl.gap_length;
+			auto line_end = line_start + cl.tick_length;
+			
+			CCoordinate c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_start)));
+			CCoordinate c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_end)));
+			lines.push_back(std::make_unique<CLine>(c1, c2));
 		}
+		pos += pattern_length * cl.length;
 	}
 }
 
-void CESCenterlinesScreen::CalculateRangeTicks(const CRunway & runway)
+void CESCenterlinesScreen::CalculateRangeTicks(CRunway & runway)
 {
 	for (auto & rt : runway.extended_centerline.range_ticks)
 	{
@@ -75,10 +84,6 @@ void CESCenterlinesScreen::CreateCenterlines()
 
 		CalculateCenterline(*rs);
 		CalculateRangeTicks(*rs);
-
-		CCoordinate c1 { rs->threshold.m_Latitude, rs->threshold.m_Longitude };
-		CCoordinate c2 { geographic.GetCoordinate(c1, rs->GetApproachCourse(CourseType::calculated), InNM(-20)) };
-		lines.push_back(std::make_unique<CLine>(CLine(c1, c2)));
 	}
 }
 
@@ -107,6 +112,7 @@ void CESCenterlinesScreen::RefreshData()
 	LoadRunwayData();
 	LoadRunwayUserData();
 	CreateCenterlines();
+	ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 }
 
 inline bool CESCenterlinesScreen::IsDataUpdated() const
@@ -115,7 +121,7 @@ inline bool CESCenterlinesScreen::IsDataUpdated() const
 			|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime);
 }
 
-void CESCenterlinesScreen::DisplayMessage(std::string message)
+inline void CESCenterlinesScreen::DisplayMessage(std::string message)
 {
-	GetPlugIn()->DisplayUserMessage("ES Centerlines", "Debug", message.c_str(), true, true, false, false, false);
+	GetPlugIn()->DisplayUserMessage("Message", "ES Centerlines", message.c_str(), true, true, false, false, false);
 }
