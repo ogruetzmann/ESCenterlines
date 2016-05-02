@@ -8,7 +8,7 @@ using namespace EuroScopePlugIn;
 #define MY_PLUGIN_NAME      "ESCenterlines"
 #define MY_PLUGIN_VERSION   "0.1"
 #define MY_PLUGIN_DEVELOPER "Oliver Grützmann"
-#define MY_PLUGIN_COPYRIGHT "GPL v3"
+#define MY_PLUGIN_COPYRIGHT "MIT license"
 
 class CESCenterlines :
 	public EuroScopePlugIn::CPlugIn
