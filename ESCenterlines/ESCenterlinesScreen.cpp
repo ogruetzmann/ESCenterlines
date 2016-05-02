@@ -1,6 +1,7 @@
 #include "ESCenterlinesScreen.h"
 
-CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime) : ActiveRunwaysUpdateTime(sTime)
+CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime) 
+	: ActiveRunwaysUpdateTime(sTime)
 {
 	ActiveRunwaysLastUpdateTime = sTime;
 }
@@ -18,7 +19,7 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 	if (IsDataUpdated())
 	{
-		CreateCenterlines();
+		RefreshData();
 		ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 		RefreshMapContent();
 	}
@@ -26,7 +27,7 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
-	CreateCenterlines();
+	RefreshData();
 }
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
@@ -44,9 +45,46 @@ void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 	SelectObject(hDC, old_pen);
 }
 
+void CESCenterlinesScreen::CalculateCenterline(const CRunway & runway)
+{
+	for (auto & cl : runway.extended_centerline.centerline_elements)
+	{
+		double pattern_length = cl.tick_length + cl.gap_length;
+		for (auto i = 0; i < cl.length; ++i)
+		{
+
+		}
+	}
+}
+
+void CESCenterlinesScreen::CalculateRangeTicks(const CRunway & runway)
+{
+	for (auto & rt : runway.extended_centerline.range_ticks)
+	{
+
+	}
+}
+
+void CESCenterlinesScreen::CreateCenterlines()
+{
+	lines.clear();
+	for (auto & rs : runways)
+	{
+		if (!rs->is_active)
+			continue;
+
+		CalculateCenterline(*rs);
+		CalculateRangeTicks(*rs);
+
+		CCoordinate c1 { rs->threshold.m_Latitude, rs->threshold.m_Longitude };
+		CCoordinate c2 { geographic.GetCoordinate(c1, rs->GetApproachCourse(CourseType::calculated), InNM(-20)) };
+		lines.push_back(std::make_unique<CLine>(CLine(c1, c2)));
+	}
+}
+
 void CESCenterlinesScreen::LoadRunwayData()
 {
-	runway_settings.clear();
+	runways.clear();
 	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
@@ -55,38 +93,26 @@ void CESCenterlinesScreen::LoadRunwayData()
 		{
 			std::unique_ptr<CRunway> runway = CRunway::CreateRunway(se, i);
 			if (runway)
-				runway_settings.push_back(std::move(runway));
+				runways.push_back(std::move(runway));
 		}
 	}
 }
 
-void CESCenterlinesScreen::LoadRunwayUserSettings(CRunway * runway)
+void CESCenterlinesScreen::LoadRunwayUserData()
 {
 }
 
-void CESCenterlinesScreen::CreateCenterlines()
+void CESCenterlinesScreen::RefreshData()
 {
 	LoadRunwayData();
-	LoadRunwayUserSettings(nullptr);
-
-	lines.clear();
-	static GeographicLib::Geodesic gd(GeographicLib::Geodesic::WGS84());
-	for (auto & rs : runway_settings)
-	{
-		CCoordinate c1 { rs->threshold.m_Latitude, rs->threshold.m_Longitude };
-		CCoordinate c2;
-
-		gd.Direct(c1.m_Latitude, c1.m_Longitude, rs->GetApproachCourse(CourseType::sectorfile), InNM(-20), c2.m_Latitude, c2.m_Longitude);
-		lines.push_back(std::make_unique<CLine>(CLine(c1, c2)));
-	}
+	LoadRunwayUserData();
+	CreateCenterlines();
 }
 
-bool CESCenterlinesScreen::IsDataUpdated() const
+inline bool CESCenterlinesScreen::IsDataUpdated() const
 {
-	if (ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
-		|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime)
-		return true;
-	return false;
+	return (ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
+			|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime);
 }
 
 void CESCenterlinesScreen::DisplayMessage(std::string message)

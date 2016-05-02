@@ -119,9 +119,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CenterlineElement.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="ESCenterlines.cpp" />
     <ClCompile Include="ESCenterlinesScreen.cpp" />
+    <ClCompile Include="ExtendedCenterline.cpp" />
+    <ClCompile Include="Geographic.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="PluginMain.cpp" />
     <ClCompile Include="RangeTick.cpp" />
@@ -170,9 +173,12 @@
     <ClInclude Include="..\..\geographiclib\include\GeographicLib\TransverseMercatorExact.hpp" />
     <ClInclude Include="..\..\geographiclib\include\GeographicLib\Utility.hpp" />
     <ClInclude Include="..\..\geographiclib\include\GeographicLib\UTMUPS.hpp" />
+    <ClInclude Include="CenterlineElement.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="ESCenterlines.h" />
     <ClInclude Include="ESCenterlinesScreen.h" />
+    <ClInclude Include="ExtendedCenterline.h" />
+    <ClInclude Include="Geographic.h" />
     <ClInclude Include="lib\EuroScopePlugIn.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="RangeTick.h" />

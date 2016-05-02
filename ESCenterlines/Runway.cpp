@@ -26,33 +26,24 @@ std::unique_ptr<CRunway> CRunway::CreateRunway(EuroScopePlugIn::CSectorElement &
 	return rwy;
 }
 
-double CRunway::GetCalculatedApproachCourse() const
-{
-	static GeographicLib::Geodesic gd(GeographicLib::Geodesic::WGS84());
-	static double azi1, azi2;
-	gd.Inverse(threshold.m_Latitude, threshold.m_Longitude, stop_end.m_Latitude, stop_end.m_Longitude, azi1, azi2);
-	return azi1;
-}
-
-inline int CRunway::GetSectorfileApproachCourse() const
-{
-	return sectorfile_approach_course;
-}
-
 double CRunway::GetApproachCourse(CourseType type)
 {
-	if (type != CourseType::preset)
-		course_type = type;
+	if (type == CourseType::preset)
+		type = course_type;
 
-	if (course_type == CourseType::sectorfile)
+	if (type == CourseType::sectorfile)
 		return sectorfile_approach_course;
-	if (course_type == CourseType::sectorfile_if_available)
-		return 0;
-	else
-		return GetCalculatedApproachCourse();
+	if (type == CourseType::sectorfile_if_available)
+	{
+		if (sectorfile_approach_course)
+			return sectorfile_approach_course;
+		else
+			return geographic.GetAzimuth(threshold, stop_end);
+	}
+	return geographic.GetAzimuth(threshold, stop_end);
 }
 
-void CRunway::SetFinalApproachFix(std::string & faf)
+void CRunway::SetFinalApproachFix(const std::string & faf)
 {
 	final_approach_fix = faf;
 }

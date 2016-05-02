@@ -39,6 +39,15 @@
     <ClCompile Include="Runway.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="Geographic.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtendedCenterline.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="CenterlineElement.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\EuroScopePlugIn.h">
@@ -186,6 +195,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Runway.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Geographic.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtendedCenterline.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="CenterlineElement.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,10 +3,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <GeographicLib\GeodesicLine.hpp>
-#include "EuroScopePlugIn.h"
+#include <EuroScopePlugIn.h>
+#include "Geographic.h"
 #include "Runway.h"
 #include "Line.h"
+#include "ExtendedCenterline.h"
 
 class CESCenterlinesScreen :
 	public EuroScopePlugIn::CRadarScreen
@@ -33,15 +34,18 @@ public:
 private:
 	const FILETIME & ActiveRunwaysUpdateTime;
 	FILETIME ActiveRunwaysLastUpdateTime;
-	std::vector <std::unique_ptr<CRunway>> runway_settings;
+	std::vector <std::unique_ptr<CRunway>> runways;
 	std::vector <std::unique_ptr<CLine>> lines;
+	CGeographic geographic;
 
 	void DrawExtendedCenterlines(HDC & hdc);
 
-	void LoadRunwayData();
-	void LoadRunwayUserSettings(CRunway * runway);
-
+	void CalculateCenterline(const CRunway & runway);
+	void CalculateRangeTicks(const CRunway & runway);
 	void CreateCenterlines();
+	void LoadRunwayData();
+	void LoadRunwayUserData();
+	void RefreshData();
 
 	bool IsDataUpdated() const;
 	void DisplayMessage(std::string message);
