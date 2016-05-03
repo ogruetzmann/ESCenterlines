@@ -22,7 +22,7 @@ EuroScopePlugIn::CRadarScreen * CESCenterlines::OnRadarScreenCreated(const char 
 																	 bool CanBeSaved, 
 																	 bool CanBeCreated)
 {
-	return new CESCenterlinesScreen(ActiveRunwaysUpdateTime);
+	return new CESCenterlinesScreen(ActiveRunwaysUpdateTime, centerline_settings);
 }
 
 void CESCenterlines::OnAirportRunwayActivityChanged()

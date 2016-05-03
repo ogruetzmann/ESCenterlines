@@ -1,6 +1,6 @@
 #pragma once
 #include <Windows.h>
-#include "EuroScopePlugIn.h"
+#include <EuroScopePlugIn.h>
 #include "ESCenterlinesScreen.h"
 
 using namespace EuroScopePlugIn;
@@ -15,6 +15,7 @@ class CESCenterlines :
 {
 private:
 	FILETIME ActiveRunwaysUpdateTime;
+	CCenterlineSettings centerline_settings;
 
 public:
 	CESCenterlines();

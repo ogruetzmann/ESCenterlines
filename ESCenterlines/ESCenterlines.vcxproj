@@ -74,11 +74,11 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Olli\Documents\GitHub\geographiclib\include;C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\Olli\Documents\GitHub\geographiclib\windows\Debug;C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>EuroScopePlugInDll.lib;Geographic_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -96,12 +96,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Olli\Documents\GitHub\geographiclib\include;C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\Olli\Documents\GitHub\geographiclib\windows\Release;C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Olli\Documents\GitHub\ESCenterlines\ESCenterlines\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>EuroScopePlugInDll.lib;Geographic.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CenterlineElement.cpp" />
+    <ClCompile Include="CenterlineSettings.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="ESCenterlines.cpp" />
     <ClCompile Include="ESCenterlinesScreen.cpp" />
@@ -131,61 +132,25 @@
     <ClCompile Include="Runway.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Accumulator.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\AlbersEqualArea.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\AzimuthalEquidistant.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\CassiniSoldner.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\CircularEngine.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Config.h" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Constants.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\DMS.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Ellipsoid.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\EllipticFunction.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GARS.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Geocentric.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GeoCoords.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Geodesic.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GeodesicExact.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GeodesicLine.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GeodesicLineExact.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Geohash.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Geoid.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Georef.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Gnomonic.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GravityCircle.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\GravityModel.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\LambertConformalConic.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\LocalCartesian.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\MagneticCircle.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\MagneticModel.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Math.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\MGRS.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\NormalGravity.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\OSGB.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\PolarStereographic.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\PolygonArea.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Rhumb.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\SphericalEngine.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\SphericalHarmonic.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\SphericalHarmonic1.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\SphericalHarmonic2.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\TransverseMercator.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\TransverseMercatorExact.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\Utility.hpp" />
-    <ClInclude Include="..\..\geographiclib\include\GeographicLib\UTMUPS.hpp" />
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="CenterlineElement.h" />
+    <ClInclude Include="CenterlineSettings.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="ESCenterlines.h" />
     <ClInclude Include="ESCenterlinesScreen.h" />
     <ClInclude Include="ExtendedCenterline.h" />
     <ClInclude Include="Geographic.h" />
-    <ClInclude Include="lib\EuroScopePlugIn.h" />
+    <ClInclude Include="include\EuroScopePlugIn.h" />
+    <ClInclude Include="include\GeographicLib\Config.h" />
+    <ClInclude Include="include\GeographicLib\Constants.hpp" />
+    <ClInclude Include="include\GeographicLib\Geodesic.hpp" />
+    <ClInclude Include="include\GeographicLib\GeodesicLine.hpp" />
+    <ClInclude Include="include\GeographicLib\Math.hpp" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="RangeTick.h" />
     <ClInclude Include="Runway.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

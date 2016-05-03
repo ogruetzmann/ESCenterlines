@@ -2,6 +2,7 @@
 
 CRunway::CRunway()
 {
+	
 }
 
 CRunway::~CRunway()
@@ -46,6 +47,11 @@ double CRunway::GetApproachCourse(CourseType type)
 void CRunway::SetFinalApproachFix(const std::string & faf)
 {
 	final_approach_fix = faf;
+}
+
+void CRunway::SetExtendedCenterline(const CExtendedCenterline & ecl)
+{
+	extended_centerline = ecl;
 }
 
 void CRunway::SetAirportString(const char * designator)

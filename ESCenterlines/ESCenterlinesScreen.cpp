@@ -1,7 +1,7 @@
 #include "ESCenterlinesScreen.h"
 
-CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime) 
-	: ActiveRunwaysUpdateTime(sTime)
+CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings)
+	: ActiveRunwaysUpdateTime(sTime), centerline_settings(centerline_settings)
 {
 	ActiveRunwaysLastUpdateTime = sTime;
 }
@@ -16,11 +16,9 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
 		DrawExtendedCenterlines(hDC);
 
-
 	if (IsDataUpdated())
 	{
 		RefreshData();
-		RefreshMapContent();
 	}
 }
 
@@ -28,7 +26,6 @@ void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
 	InitAsrSettings();
 	RefreshData();
-	RefreshMapContent();
 }
 
 bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
@@ -37,14 +34,12 @@ bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
 	{
 		display_active = !display_active;
 		RefreshData();
-		RefreshMapContent();
 		return true;
 	}
 	if (!strcmp(sCommandLine, ".cline display"))
 	{
 		display_centerlines = !display_centerlines;
 		RefreshData();
-		RefreshMapContent();
 		return true;
 	}
 	return false;
@@ -76,9 +71,8 @@ void CESCenterlinesScreen::CalculateCenterline(CRunway & runway)
 			if (cl.starts_with_gap)
 				line_start += cl.gap_length;
 			auto line_end = line_start + cl.tick_length;
-			
-			auto c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_start)));
-			auto c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(line_end)));
+			auto c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_start * Constants::nauticalmile());
+			auto c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_end * Constants::nauticalmile());
 			lines.push_back(std::make_unique<CLine>(c1, c2));
 		}
 		pos += pattern_length * cl.length;
@@ -90,17 +84,17 @@ void CESCenterlinesScreen::CalculateRangeTicks(CRunway & runway)
 	for (auto & rt : runway.extended_centerline.range_ticks)
 	{
 		auto tick_azimuth_left = runway.GetApproachCourse() - 90;
-		auto c_base = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -(InNM(rt.distance_thr)));
+		auto c_base = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -rt.distance_thr * Constants::nauticalmile());
 		if (rt.direction == Direction::left || rt.direction == Direction::both)
 		{
-			auto c1_left = geographic.GetCoordinate(c_base, tick_azimuth_left, InNM(rt.distance_cl));
-			auto c2_left = geographic.GetCoordinate(c1_left, tick_azimuth_left, InNM(rt.length));
+			auto c1_left = geographic.GetCoordinate(c_base, tick_azimuth_left, rt.distance_cl * Constants::nauticalmile());
+			auto c2_left = geographic.GetCoordinate(c1_left, tick_azimuth_left, rt.length * Constants::nauticalmile());
 			lines.push_back(std::make_unique<CLine>(c1_left, c2_left));
 		}
 		if (rt.direction == Direction::right || rt.direction == Direction::both)
 		{
-			auto c1_right = geographic.GetCoordinate(c_base, tick_azimuth_left, -InNM(rt.distance_cl));
-			auto c2_right = geographic.GetCoordinate(c1_right, tick_azimuth_left, -InNM(rt.length));
+			auto c1_right = geographic.GetCoordinate(c_base, tick_azimuth_left, -rt.distance_cl * Constants::nauticalmile());
+			auto c2_right = geographic.GetCoordinate(c1_right, tick_azimuth_left, -rt.length * Constants::nauticalmile());
 			lines.push_back(std::make_unique<CLine>(c1_right, c2_right));
 		}
 	}
@@ -108,9 +102,6 @@ void CESCenterlinesScreen::CalculateRangeTicks(CRunway & runway)
 
 void CESCenterlinesScreen::CreateCenterlines()
 {
-	lines.clear();
-	if (!display_centerlines)
-		return;
 	for (auto & rs : runways)
 	{
 		if (display_active && !rs->is_active)
@@ -126,7 +117,7 @@ void CESCenterlinesScreen::InitAsrSettings()
 	if (!(GetDataFromAsr(DISPLAY_CENTERLINES)))
 		SaveDataToAsr(DISPLAY_CENTERLINES, DISPLAY_CENTERLINES, "1");
 	if (!strcmp(GetDataFromAsr(DISPLAY_CENTERLINES), "0"))
-			display_centerlines = false;
+		display_centerlines = false;
 	if (!(GetDataFromAsr(DISPLAY_ACTIVE)))
 		SaveDataToAsr(DISPLAY_ACTIVE, DISPLAY_ACTIVE, "1");
 	if (!strcmp(GetDataFromAsr(DISPLAY_ACTIVE), "0"))
@@ -135,7 +126,7 @@ void CESCenterlinesScreen::InitAsrSettings()
 
 void CESCenterlinesScreen::LoadRunwayData()
 {
-	runways.clear();
+
 	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
@@ -144,27 +135,36 @@ void CESCenterlinesScreen::LoadRunwayData()
 		{
 			std::unique_ptr<CRunway> runway = CRunway::CreateRunway(se, i);
 			if (runway)
+			{
+				LoadRunwayUserData(*runway);
 				runways.push_back(std::move(runway));
+			}
 		}
 	}
 }
 
-void CESCenterlinesScreen::LoadRunwayUserData()
+void CESCenterlinesScreen::LoadRunwayUserData(CRunway & runway)
 {
+	runway.extended_centerline = centerline_settings.Find(runway.airport_designator, runway.runway_designator);
 }
 
 void CESCenterlinesScreen::RefreshData()
 {
-	LoadRunwayData();
-	LoadRunwayUserData();
-	CreateCenterlines();
+	lines.clear();
+	runways.clear();
+	if (display_centerlines)
+	{
+		LoadRunwayData();
+		CreateCenterlines();
+	}
+	RefreshMapContent();
 	ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 }
 
 inline bool CESCenterlinesScreen::IsDataUpdated() const
 {
-	return (ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
-			|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime);
+	return ActiveRunwaysUpdateTime.dwLowDateTime != ActiveRunwaysLastUpdateTime.dwLowDateTime
+		|| ActiveRunwaysUpdateTime.dwHighDateTime != ActiveRunwaysLastUpdateTime.dwHighDateTime;
 }
 
 inline void CESCenterlinesScreen::DisplayMessage(std::string message)

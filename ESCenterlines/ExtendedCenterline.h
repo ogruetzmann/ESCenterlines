@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "RangeTick.h"
 #include "CenterlineElement.h"
-
 
 class CExtendedCenterline
 {
@@ -12,5 +12,7 @@ public:
 
 	CExtendedCenterline();
 	virtual ~CExtendedCenterline();
+
+	void SetDefault();
 };
 

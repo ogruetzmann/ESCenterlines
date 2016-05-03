@@ -8,6 +8,9 @@
 #include "Runway.h"
 #include "Line.h"
 #include "ExtendedCenterline.h"
+#include "CenterlineSettings.h"
+
+using GeographicLib::Constants;
 
 class CESCenterlinesScreen :
 	public EuroScopePlugIn::CRadarScreen
@@ -15,7 +18,7 @@ class CESCenterlinesScreen :
 public:
 	static constexpr double meters_per_nm { 1852 };
 
-	explicit CESCenterlinesScreen(FILETIME & sTime);
+	explicit CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings);
 	virtual ~CESCenterlinesScreen();
 
 	void OnRefresh(HDC hDC, int Phase);
@@ -27,11 +30,6 @@ public:
 	}
 	bool OnCompileCommand(const char * sCommandLine);
 
-	inline double InNM(double distance_in_nautical_miles)
-	{
-		return distance_in_nautical_miles * meters_per_nm;
-	}
-
 private:
 	const char * DISPLAY_CENTERLINES = "Display_Centerlines";
 	const char * DISPLAY_ACTIVE = "Display Active";
@@ -42,6 +40,7 @@ private:
 	CGeographic geographic;
 	bool display_centerlines { true };
 	bool display_active { true };
+	CCenterlineSettings & centerline_settings;
 
 	void DrawExtendedCenterlines(HDC & hdc);
 
@@ -50,7 +49,7 @@ private:
 	void CreateCenterlines();
 	void InitAsrSettings();
 	void LoadRunwayData();
-	void LoadRunwayUserData();
+	void LoadRunwayUserData(CRunway & runway);
 	void RefreshData();
 
 	bool IsDataUpdated() const;

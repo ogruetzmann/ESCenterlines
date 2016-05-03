@@ -33,6 +33,7 @@ public:
 	double GetApproachCourse(CourseType ct = CourseType::preset);
 
 	void SetFinalApproachFix(const std::string & faf);
+	void SetExtendedCenterline(const CExtendedCenterline & extended_centerline);
 	
 private:
 	CGeographic geographic;
