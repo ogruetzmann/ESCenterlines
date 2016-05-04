@@ -1,11 +1,13 @@
 #pragma once
 #include <Windows.h>
 #include <string>
+#include <vector>
 #include <memory>
 #include <EuroScopePlugIn.h>
-#include "Geographic.h"
+//#include "Geographic.h"
 #include "Coordinate.h"
 #include "ExtendedCenterline.h"
+#include "Line.h"
 
 enum class CourseType
 {
@@ -17,6 +19,7 @@ class CRunway
 public:
 	bool is_active { false };
 	int sectorfile_approach_course { 0 };
+	double calculated_approach_course { 0.0 };
 	CCoordinate threshold { 0.0, 0.0 };
 	CCoordinate stop_end { 0.0, 0.0 };
 	std::string runway_designator;
@@ -24,6 +27,7 @@ public:
 	std::string airport_designator;
 	CourseType course_type { CourseType::calculated };
 	CExtendedCenterline extended_centerline;
+	std::vector<CLine> lines;
 
 
 	CRunway();
@@ -36,7 +40,7 @@ public:
 	void SetExtendedCenterline(const CExtendedCenterline & extended_centerline);
 	
 private:
-	CGeographic geographic;
+	//CGeographic geographic;
 	void SetAirportString(const char * designator);
 };
 

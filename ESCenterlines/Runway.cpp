@@ -39,9 +39,9 @@ double CRunway::GetApproachCourse(CourseType type)
 		if (sectorfile_approach_course)
 			return sectorfile_approach_course;
 		else
-			return geographic.GetAzimuth(threshold, stop_end);
+			return calculated_approach_course; //geographic.GetAzimuth(threshold, stop_end);
 	}
-	return geographic.GetAzimuth(threshold, stop_end);
+	return calculated_approach_course; // geographic.GetAzimuth(threshold, stop_end);
 }
 
 void CRunway::SetFinalApproachFix(const std::string & faf)

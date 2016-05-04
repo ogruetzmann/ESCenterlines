@@ -7,8 +7,8 @@
 #include "Geographic.h"
 #include "Runway.h"
 #include "Line.h"
-#include "ExtendedCenterline.h"
 #include "CenterlineSettings.h"
+#include "DataObjects.h"
 
 using GeographicLib::Constants;
 
@@ -36,21 +36,20 @@ private:
 	const FILETIME & ActiveRunwaysUpdateTime;
 	FILETIME ActiveRunwaysLastUpdateTime;
 	std::vector <std::unique_ptr<CRunway>> runways;
-	std::vector <std::unique_ptr<CLine>> lines;
 	CGeographic geographic;
 	bool display_centerlines { true };
 	bool display_active { true };
 	CCenterlineSettings & centerline_settings;
+	std::vector<identifier> active_runways;
 
 	void DrawExtendedCenterlines(HDC & hdc);
+	void DrawLines(HDC &hDC, std::vector<CLine> & lines);
 
-	void CalculateCenterline(CRunway & runway);
-	void CalculateRangeTicks(CRunway & runway);
-	void CreateCenterlines();
+	std::unique_ptr<CCoordinate> GetFixCoordinate(const std::string & name, const CCoordinate & threshold);
 	void InitAsrSettings();
+	bool IsRunwayActive(const std::string & airport, const std::string & runway) const;
 	void LoadRunwayData();
-	void LoadRunwayUserData(CRunway & runway);
-	void RefreshData();
+	void RefreshActiveRunways();
 
 	bool IsDataUpdated() const;
 	void DisplayMessage(std::string message);

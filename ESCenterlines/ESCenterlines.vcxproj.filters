@@ -51,6 +51,9 @@
     <ClCompile Include="CenterlineSettings.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="jsoncpp.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
@@ -102,6 +105,15 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\GeographicLib\Math.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjects.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="include\json\json.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\json\json-forwards.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

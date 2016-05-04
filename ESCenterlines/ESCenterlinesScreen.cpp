@@ -3,7 +3,7 @@
 CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings)
 	: ActiveRunwaysUpdateTime(sTime), centerline_settings(centerline_settings)
 {
-	ActiveRunwaysLastUpdateTime = sTime;
+	ActiveRunwaysLastUpdateTime = sTime; 
 }
 
 
@@ -15,17 +15,15 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 {
 	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
 		DrawExtendedCenterlines(hDC);
-
 	if (IsDataUpdated())
-	{
-		RefreshData();
-	}
+		RefreshActiveRunways();
 }
 
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
 	InitAsrSettings();
-	RefreshData();
+	LoadRunwayData();
+	RefreshActiveRunways();
 }
 
 bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
@@ -33,13 +31,13 @@ bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
 	if (!strcmp(sCommandLine, ".cline active"))
 	{
 		display_active = !display_active;
-		RefreshData();
+		RefreshMapContent();
 		return true;
 	}
 	if (!strcmp(sCommandLine, ".cline display"))
 	{
 		display_centerlines = !display_centerlines;
-		RefreshData();
+		RefreshMapContent();
 		return true;
 	}
 	return false;
@@ -47,69 +45,44 @@ bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 {
+	if (!display_centerlines)
+		return;
 	auto pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
 	auto old_pen = SelectObject(hDC, pen);
-	for (auto & line : lines)
-	{
-		auto pp1 = ConvertCoordFromPositionToPixel(line->c1);
-		auto pp2 = ConvertCoordFromPositionToPixel(line->c2);
-		MoveToEx(hDC, pp1.x, pp1.y, nullptr);
-		LineTo(hDC, pp2.x, pp2.y);
-	}
+	for (auto & runway : runways)
+		if (!display_active || IsRunwayActive(runway->airport_designator, runway->runway_designator))
+			DrawLines(hDC, runway->lines);
 	SelectObject(hDC, old_pen);
 }
 
-void CESCenterlinesScreen::CalculateCenterline(CRunway & runway)
+void CESCenterlinesScreen::DrawLines(HDC & hDC, std::vector<CLine>& lines)
 {
-	auto pos = 0.0;
-	for (auto & cl : runway.extended_centerline.centerline_elements)
+	for (auto & line : lines)
 	{
-		auto pattern_length = cl.tick_length + cl.gap_length;
-		for (auto i = 0; i < cl.length; ++i)
-		{
-			auto line_start = i * pattern_length + pos;
-			if (cl.starts_with_gap)
-				line_start += cl.gap_length;
-			auto line_end = line_start + cl.tick_length;
-			auto c1 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_start * Constants::nauticalmile());
-			auto c2 = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_end * Constants::nauticalmile());
-			lines.push_back(std::make_unique<CLine>(c1, c2));
-		}
-		pos += pattern_length * cl.length;
+		auto pp1 = ConvertCoordFromPositionToPixel(line.c1);
+		auto pp2 = ConvertCoordFromPositionToPixel(line.c2);
+		MoveToEx(hDC, pp1.x, pp1.y, nullptr);
+		LineTo(hDC, pp2.x, pp2.y);
 	}
 }
 
-void CESCenterlinesScreen::CalculateRangeTicks(CRunway & runway)
+std::unique_ptr<CCoordinate> CESCenterlinesScreen::GetFixCoordinate(const std::string & name, const CCoordinate & threshold)
 {
-	for (auto & rt : runway.extended_centerline.range_ticks)
+	if (!name.length())
+		return nullptr;
+	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_FIX);
+		 se.IsValid();
+		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_FIX))
 	{
-		auto tick_azimuth_left = runway.GetApproachCourse() - 90;
-		auto c_base = geographic.GetCoordinate(runway.threshold, runway.GetApproachCourse(), -rt.distance_thr * Constants::nauticalmile());
-		if (rt.direction == Direction::left || rt.direction == Direction::both)
+		if (se.GetName() == name)
 		{
-			auto c1_left = geographic.GetCoordinate(c_base, tick_azimuth_left, rt.distance_cl * Constants::nauticalmile());
-			auto c2_left = geographic.GetCoordinate(c1_left, tick_azimuth_left, rt.length * Constants::nauticalmile());
-			lines.push_back(std::make_unique<CLine>(c1_left, c2_left));
-		}
-		if (rt.direction == Direction::right || rt.direction == Direction::both)
-		{
-			auto c1_right = geographic.GetCoordinate(c_base, tick_azimuth_left, -rt.distance_cl * Constants::nauticalmile());
-			auto c2_right = geographic.GetCoordinate(c1_right, tick_azimuth_left, -rt.length * Constants::nauticalmile());
-			lines.push_back(std::make_unique<CLine>(c1_right, c2_right));
+			CCoordinate c;
+			se.GetPosition(&c, 0);
+			if (c.DistanceTo(threshold) <= 30)
+				return std::make_unique<CCoordinate>(c);
 		}
 	}
-}
-
-void CESCenterlinesScreen::CreateCenterlines()
-{
-	for (auto & rs : runways)
-	{
-		if (display_active && !rs->is_active)
-			continue;
-
-		CalculateCenterline(*rs);
-		CalculateRangeTicks(*rs);
-	}
+	return nullptr;
 }
 
 void CESCenterlinesScreen::InitAsrSettings()
@@ -124,9 +97,16 @@ void CESCenterlinesScreen::InitAsrSettings()
 		display_active = false;
 }
 
+bool CESCenterlinesScreen::IsRunwayActive(const std::string & airport, const std::string & runway) const
+{
+	for (auto & id : active_runways)
+		if (id.airport_designator == airport && id.runway_designator == runway)
+			return true;
+	return false;
+}
+
 void CESCenterlinesScreen::LoadRunwayData()
 {
-
 	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
@@ -136,29 +116,32 @@ void CESCenterlinesScreen::LoadRunwayData()
 			std::unique_ptr<CRunway> runway = CRunway::CreateRunway(se, i);
 			if (runway)
 			{
-				LoadRunwayUserData(*runway);
+				centerline_settings.GetCenterlineSettings(*runway);
+				geographic.CalculateExtendedCenterline(*runway, GetFixCoordinate(runway->final_approach_fix, runway->threshold).get());
 				runways.push_back(std::move(runway));
 			}
 		}
 	}
 }
 
-void CESCenterlinesScreen::LoadRunwayUserData(CRunway & runway)
+void CESCenterlinesScreen::RefreshActiveRunways()
 {
-	runway.extended_centerline = centerline_settings.Find(runway.airport_designator, runway.runway_designator);
-}
-
-void CESCenterlinesScreen::RefreshData()
-{
-	lines.clear();
-	runways.clear();
-	if (display_centerlines)
+	ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
+	active_runways.clear();
+	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
+		 se.IsValid();
+		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
 	{
-		LoadRunwayData();
-		CreateCenterlines();
+		for (auto i = 0; i < 2; ++i)
+			if (se.IsElementActive(false, i))
+			{
+				std::string airport = se.GetAirportName();
+				airport.resize(4);
+				std::string runway = se.GetRunwayName(i);
+				active_runways.push_back({ airport, runway });
+			}	
 	}
 	RefreshMapContent();
-	ActiveRunwaysLastUpdateTime = ActiveRunwaysUpdateTime; // Set timestamp to last update
 }
 
 inline bool CESCenterlinesScreen::IsDataUpdated() const

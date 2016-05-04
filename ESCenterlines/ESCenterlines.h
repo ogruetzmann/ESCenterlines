@@ -1,21 +1,22 @@
 #pragma once
 #include <Windows.h>
 #include <EuroScopePlugIn.h>
+#include <memory>
 #include "ESCenterlinesScreen.h"
 
 using namespace EuroScopePlugIn;
 
-#define MY_PLUGIN_NAME      "ESCenterlines"
-#define MY_PLUGIN_VERSION   "0.1"
-#define MY_PLUGIN_DEVELOPER "Oliver Grützmann"
-#define MY_PLUGIN_COPYRIGHT "MIT license"
+const char MY_PLUGIN_NAME[] = "ESCenterlines";
+const char MY_PLUGIN_VERSION[] = "0.2";
+const char MY_PLUGIN_DEVELOPER[] = "Oliver Grützmann";
+const char MY_PLUGIN_COPYRIGHT[] = "MIT license";
 
 class CESCenterlines :
 	public EuroScopePlugIn::CPlugIn
 {
 private:
 	FILETIME ActiveRunwaysUpdateTime;
-	CCenterlineSettings centerline_settings;
+	std::unique_ptr<CCenterlineSettings> centerline_settings { std::make_unique<CCenterlineSettings>() };
 
 public:
 	CESCenterlines();

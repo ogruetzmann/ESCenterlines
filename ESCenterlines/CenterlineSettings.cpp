@@ -4,20 +4,34 @@
 
 CCenterlineSettings::CCenterlineSettings()
 {
+	Load();
 	default_centerline.SetDefault();
 }
 
 
 CCenterlineSettings::~CCenterlineSettings()
 {
+	Save();
 }
 
-const CExtendedCenterline & CCenterlineSettings::Find(const std::string airport, const std::string runway)
+void CCenterlineSettings::GetCenterlineSettings(CRunway & runway)
 {
 	for (auto & m : memory)
 	{
-		if (m.first.airport_designator == airport && m.first.runway_designator == runway)
-			return m.second;
+		if (m.first.airport_designator == runway.airport_designator 
+			&& m.first.runway_designator == runway.runway_designator)
+		{
+			runway.SetExtendedCenterline(m.second);
+			return;
+		}
 	}
-	return default_centerline;
+	runway.SetExtendedCenterline(default_centerline);
+}
+
+void CCenterlineSettings::Load()
+{
+}
+
+void CCenterlineSettings::Save()
+{
 }
