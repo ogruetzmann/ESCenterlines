@@ -14,7 +14,10 @@ CGeographic::~CGeographic()
 
 void CGeographic::CalculateExtendedCenterline(CRunway & runway, CCoordinate * coordinate)
 {
-	CalculateApproachCourse(runway, coordinate);
+	if (!runway.extended_centerline.course)
+		CalculateApproachCourse(runway, coordinate);
+	else
+		runway.calculated_approach_course = runway.extended_centerline.course;
 	CalculateCenterline(runway);
 	CalculateRangeTicks(runway);
 }
@@ -52,7 +55,7 @@ void CGeographic::CalculateCenterline(CRunway & runway)
 			auto line_end = line_start + cl.tick_length;
 			auto c1 = GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_start * GeographicLib::Constants::nauticalmile());
 			auto c2 = GetCoordinate(runway.threshold, runway.GetApproachCourse(), -line_end * GeographicLib::Constants::nauticalmile());
-			runway.lines.push_back(CLine(c1, c2));
+			runway.AddLine(CLine(c1, c2));
 		}
 		pos += pattern_length * cl.length;
 	}
@@ -68,13 +71,19 @@ void CGeographic::CalculateRangeTicks(CRunway & runway)
 		{
 			auto c1_left = GetCoordinate(c_base, tick_azimuth_left, rt.distance_cl * GeographicLib::Constants::nauticalmile());
 			auto c2_left = GetCoordinate(c1_left, tick_azimuth_left, rt.length * GeographicLib::Constants::nauticalmile());
-			runway.lines.push_back(CLine(c1_left, c2_left));
+			if (rt.depends)
+				runway.AddLine(CLine(c1_left, c2_left, rt.depends_on.airport_designator, rt.depends_on.runway_designator));
+			else
+				runway.AddLine(CLine(c1_left, c2_left));
 		}
 		if (rt.direction == Direction::right || rt.direction == Direction::both)
 		{
 			auto c1_right = GetCoordinate(c_base, tick_azimuth_left, -rt.distance_cl * GeographicLib::Constants::nauticalmile());
 			auto c2_right = GetCoordinate(c1_right, tick_azimuth_left, -rt.length * GeographicLib::Constants::nauticalmile());
-			runway.lines.push_back(CLine(c1_right, c2_right));
+			if (rt.depends)
+				runway.AddLine(CLine(c1_right, c2_right, rt.depends_on.airport_designator, rt.depends_on.runway_designator));
+			else
+				runway.AddLine(CLine(c1_right, c2_right));
 		}
 	}
 }

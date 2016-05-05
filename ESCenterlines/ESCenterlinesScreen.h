@@ -16,9 +16,7 @@ class CESCenterlinesScreen :
 	public EuroScopePlugIn::CRadarScreen
 {
 public:
-	static constexpr double meters_per_nm { 1852 };
-
-	explicit CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings);
+	CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings);
 	virtual ~CESCenterlinesScreen();
 
 	void OnRefresh(HDC hDC, int Phase);
@@ -28,6 +26,7 @@ public:
 	{
 		delete this;
 	}
+	void OnAsrContentToBeSaved(void);
 	bool OnCompileCommand(const char * sCommandLine);
 
 private:
@@ -40,14 +39,14 @@ private:
 	bool display_centerlines { true };
 	bool display_active { true };
 	CCenterlineSettings & centerline_settings;
-	std::vector<identifier> active_runways;
+	std::vector<Identifier> active_runways;
 
 	void DrawExtendedCenterlines(HDC & hdc);
-	void DrawLines(HDC &hDC, std::vector<CLine> & lines);
+	void DrawLines(HDC &hDC, const std::vector<CLine> & lines);
 
 	std::unique_ptr<CCoordinate> GetFixCoordinate(const std::string & name, const CCoordinate & threshold);
 	void InitAsrSettings();
-	bool IsRunwayActive(const std::string & airport, const std::string & runway) const;
+	bool IsRunwayActive(const Identifier & id) const;
 	void LoadRunwayData();
 	void RefreshActiveRunways();
 
