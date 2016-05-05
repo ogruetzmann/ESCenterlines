@@ -33,9 +33,6 @@
     <ClCompile Include="Line.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="RangeTick.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="Runway.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
@@ -45,13 +42,13 @@
     <ClCompile Include="ExtendedCenterline.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CenterlineElement.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="CenterlineSettings.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="jsoncpp.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Identifier.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,9 +56,6 @@
     <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CenterlineElement.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="Coordinate.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -78,9 +72,6 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Line.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="RangeTick.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="Runway.h">
@@ -115,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="include\json\json-forwards.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Identifier.h">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

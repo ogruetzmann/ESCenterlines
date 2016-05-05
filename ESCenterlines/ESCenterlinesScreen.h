@@ -7,6 +7,7 @@
 #include "Geographic.h"
 #include "Runway.h"
 #include "Line.h"
+#include "ExtendedCenterline.h"
 #include "CenterlineSettings.h"
 #include "DataObjects.h"
 
@@ -16,41 +17,42 @@ class CESCenterlinesScreen :
 	public EuroScopePlugIn::CRadarScreen
 {
 public:
-	CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings);
+	CESCenterlinesScreen(FILETIME& sTime, CCenterlineSettings& centerline_settings);
 	virtual ~CESCenterlinesScreen();
 
-	void OnRefresh(HDC hDC, int Phase);
 	void OnAsrContentLoaded(bool Loaded);
-
-	inline void OnAsrContentToBeClosed()
-	{
-		delete this;
-	}
+	void OnAsrContentToBeClosed();
 	void OnAsrContentToBeSaved(void);
-	bool OnCompileCommand(const char * sCommandLine);
+	bool OnCompileCommand(const char* sCommandLine);
+	void OnRefresh(HDC hDC, int Phase);
 
 private:
-	const char * DISPLAY_CENTERLINES = "Display_Centerlines";
-	const char * DISPLAY_ACTIVE = "Display Active";
-	const FILETIME & ActiveRunwaysUpdateTime;
+	const char* DISPLAY_CENTERLINES = "Display_Centerlines";
+	const char* DISPLAY_ACTIVE = "Display Active";
+
+	const FILETIME& ActiveRunwaysUpdateTime;
 	FILETIME ActiveRunwaysLastUpdateTime;
-	std::vector <std::unique_ptr<CRunway>> runways;
-	CGeographic geographic;
 	bool display_centerlines { true };
 	bool display_active { true };
-	CCenterlineSettings & centerline_settings;
+	
+	std::vector<std::unique_ptr<CRunway>> runways;
+	std::vector<std::unique_ptr<CExtendedCenterline>> centerlines;
 	std::vector<Identifier> active_runways;
+	std::vector<CLine> lines;
 
-	void DrawExtendedCenterlines(HDC & hdc);
-	void DrawLines(HDC &hDC, const std::vector<CLine> & lines);
-
-	std::unique_ptr<CCoordinate> GetFixCoordinate(const std::string & name, const CCoordinate & threshold);
+	CGeographic geographic;
+	CCenterlineSettings& centerline_settings;
+	
+	void CreateLines();
+	void DrawExtendedCenterlines(HDC& hdc);
+	void DrawLines(HDC& hDC);
+	std::unique_ptr<CCoordinate> GetFixCoordinate(const std::string& name, const CCoordinate& threshold);
 	void InitAsrSettings();
-	bool IsRunwayActive(const Identifier & id) const;
+	bool IsDataUpdated() const;
+	bool IsRunwayActive(const Identifier& id) const;
 	void LoadRunwayData();
 	void RefreshActiveRunways();
 
-	bool IsDataUpdated() const;
 	void DisplayMessage(std::string message);
 };
 

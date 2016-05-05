@@ -119,24 +119,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CenterlineElement.cpp" />
     <ClCompile Include="CenterlineSettings.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="ESCenterlines.cpp" />
     <ClCompile Include="ESCenterlinesScreen.cpp" />
     <ClCompile Include="ExtendedCenterline.cpp" />
     <ClCompile Include="Geographic.cpp" />
+    <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="PluginMain.cpp" />
-    <ClCompile Include="RangeTick.cpp" />
     <ClCompile Include="Runway.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CenterlineElement.h" />
     <ClInclude Include="CenterlineSettings.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="DataObjects.h" />
@@ -144,6 +142,7 @@
     <ClInclude Include="ESCenterlinesScreen.h" />
     <ClInclude Include="ExtendedCenterline.h" />
     <ClInclude Include="Geographic.h" />
+    <ClInclude Include="Identifier.h" />
     <ClInclude Include="include\EuroScopePlugIn.h" />
     <ClInclude Include="include\GeographicLib\Config.h" />
     <ClInclude Include="include\GeographicLib\Constants.hpp" />
@@ -153,7 +152,6 @@
     <ClInclude Include="include\json\json-forwards.h" />
     <ClInclude Include="include\json\json.h" />
     <ClInclude Include="Line.h" />
-    <ClInclude Include="RangeTick.h" />
     <ClInclude Include="Runway.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

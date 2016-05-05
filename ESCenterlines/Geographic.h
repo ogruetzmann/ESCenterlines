@@ -1,6 +1,8 @@
 #pragma once
 #include <GeographicLib\Geodesic.hpp>
 #include "Runway.h"
+#include "Line.h"
+#include "ExtendedCenterline.h"
 #include "Coordinate.h"
 
 class CGeographic
@@ -9,7 +11,7 @@ public:
 	CGeographic();
 	~CGeographic();
 
-	void CalculateExtendedCenterline(CRunway & runway, CCoordinate * coordinate);
+	void CalculateExtendedCenterline(const CRunway& runway, CExtendedCenterline& cl, const CCoordinate * coordinate, std::vector<CLine>& l);
 	double GetAzimuth(const CCoordinate & c1, const CCoordinate & c2);
 	CCoordinate GetCoordinate(CCoordinate c1, double azimuth, double distance);
 	double GetDistance(const CCoordinate & c1, const CCoordinate & c2);
@@ -17,8 +19,8 @@ public:
 private:
 	GeographicLib::Geodesic geodesic;
 
-	void CalculateCenterline(CRunway & runway);
-	void CalculateRangeTicks(CRunway & runway);
-	void CalculateApproachCourse(CRunway & runway, CCoordinate * coordinate);
+	void CalculateCenterline(const CRunway& rwy, const CExtendedCenterline& cl, std::vector<CLine>& l, double course);
+	void CalculateRangeTicks(const CRunway& runway, const CExtendedCenterline& centerline, std::vector<CLine>& l, double course);
+	double CalculateApproachCourse(const CRunway& runway, const CCoordinate* coordinate);
 };
 

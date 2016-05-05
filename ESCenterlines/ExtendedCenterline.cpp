@@ -1,8 +1,7 @@
 #include "ExtendedCenterline.h"
 
-
-
-CExtendedCenterline::CExtendedCenterline()
+CExtendedCenterline::CExtendedCenterline(Identifier& id)
+	: id(id)
 {
 }
 
@@ -10,43 +9,49 @@ CExtendedCenterline::~CExtendedCenterline()
 {
 }
 
-void CExtendedCenterline::AddElement(CCenterlineElement & element)
+void CExtendedCenterline::AddElement(CenterlineElement&& e)
 {
-	centerline_elements.push_back(element);
+	elements.push_back(std::move(e));
 }
 
-void CExtendedCenterline::AddElement(double tick_length, double gap_length, double length, bool starts_with_gap)
+void CExtendedCenterline::AddMarker(CenterlineMarker&& m)
 {
-	centerline_elements.push_back(CCenterlineElement(tick_length, gap_length, length, starts_with_gap));
+	markers.push_back(std::move(m));
 }
 
-void CExtendedCenterline::AddRangeTick(CRangeTick & rt)
+double CExtendedCenterline::GetCourse() const
 {
-	range_ticks.push_back(rt);
+	return course;
 }
 
-void CExtendedCenterline::AddRangeTick(double distance_from_threshold, double distance_from_centerline, double length, Direction direction, double angle)
+const std::vector<CenterlineElement>& CExtendedCenterline::GetElements() const
 {
-	range_ticks.push_back(CRangeTick(distance_from_threshold, distance_from_centerline, length, direction, angle));
+	return elements;
 }
 
-void CExtendedCenterline::AddRangeTick(double distance_from_threshold, 
-									   double distance_from_centerline, 
-									   double length, 
-									   std::string depends_airport, 
-									   std::string depends_runway, 
-									   Direction direction, 
-									   double angle)
+const std::string & CExtendedCenterline::GetFinalApproachFix() const
 {
-	range_ticks.push_back(CRangeTick(distance_from_threshold, distance_from_centerline, length, Identifier(depends_airport, depends_runway), direction, angle));
+	return final_approach_fix;
 }
 
-void CExtendedCenterline::SetDefault()
+const Identifier & CExtendedCenterline::GetIdentifier() const
 {
-	AddRangeTick(4, 0.5, 0.5, Direction::both);
-	AddRangeTick(10, 0.5, 0.5, Direction::both);
-	AddRangeTick(20, 0.5, 0.5, Direction::both);
-	AddElement(1, 1, 10, true);
-	AddElement(4, 1, 2, true);
+	return id;
 }
 
+const std::vector<CenterlineMarker>& CExtendedCenterline::GetMarkers() const
+{
+	return markers;
+}
+
+double CExtendedCenterline::SetCourse(double crs)
+{
+	if (id == Identifier("*", "*"))
+		return crs;
+	return course = crs;
+}
+
+void CExtendedCenterline::SetFinalApproachFix(const std::string & fap)
+{
+	final_approach_fix = fap;
+}

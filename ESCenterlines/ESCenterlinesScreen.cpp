@@ -1,9 +1,9 @@
 #include "ESCenterlinesScreen.h"
 
-CESCenterlinesScreen::CESCenterlinesScreen(FILETIME & sTime, CCenterlineSettings & centerline_settings)
+CESCenterlinesScreen::CESCenterlinesScreen(FILETIME& sTime, CCenterlineSettings& centerline_settings)
 	: ActiveRunwaysUpdateTime(sTime), centerline_settings(centerline_settings)
 {
-	ActiveRunwaysLastUpdateTime = sTime; 
+	ActiveRunwaysLastUpdateTime = sTime;
 }
 
 
@@ -11,19 +11,17 @@ CESCenterlinesScreen::~CESCenterlinesScreen()
 {
 }
 
-void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
-{
-	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
-		DrawExtendedCenterlines(hDC);
-	if (IsDataUpdated())
-		RefreshActiveRunways();
-}
-
 void CESCenterlinesScreen::OnAsrContentLoaded(bool Loaded)
 {
 	InitAsrSettings();
 	LoadRunwayData();
+	CreateLines();
 	RefreshActiveRunways();
+}
+
+void CESCenterlinesScreen::OnAsrContentToBeClosed()
+{
+	delete this;
 }
 
 void CESCenterlinesScreen::OnAsrContentToBeSaved(void)
@@ -48,38 +46,57 @@ bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
 	}
 	if (!strcmp(sCommandLine, ".cline save"))
 	{
-		centerline_settings.Save(runways);
+		//centerline_settings.Save(runways);
 		return true;
 	}
 	return false;
+}
+
+void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
+{
+	if (Phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
+		DrawExtendedCenterlines(hDC);
+	if (IsDataUpdated())
+		RefreshActiveRunways();
+}
+
+void CESCenterlinesScreen::CreateLines()
+{
+	for (auto& r : runways)
+	{
+		auto cl = centerline_settings.GetExtendedCenterline(r->GetId());
+		auto fap = GetFixCoordinate(cl.GetFinalApproachFix(), r->GetThresholdPosition());
+		geographic.CalculateExtendedCenterline(*r, cl, fap.get(), lines);
+	}
 }
 
 void CESCenterlinesScreen::DrawExtendedCenterlines(HDC & hDC)
 {
 	if (!display_centerlines)
 		return;
-	auto pen = CreatePen(BS_SOLID, 1, RGB(200, 200, 200));
+	auto color = RGB(200, 200, 200);
+	auto pen = CreatePen(BS_SOLID, 1, color);
 	auto old_pen = SelectObject(hDC, pen);
-	for (auto & runway : runways)
-		if (!display_active || IsRunwayActive(runway->identifier))
-			DrawLines(hDC, runway->GetLines());
+	DrawLines(hDC);
 	SelectObject(hDC, old_pen);
 }
 
-void CESCenterlinesScreen::DrawLines(HDC & hDC, const std::vector<CLine>& lines)
+void CESCenterlinesScreen::DrawLines(HDC & hDC)
 {
 	for (auto & line : lines)
 	{
-		if (line.depending && (!display_active || IsRunwayActive(line.depends_on)))
+		if (display_active && !IsRunwayActive(line.GetId()))
 			continue;
-		auto pp1 = ConvertCoordFromPositionToPixel(line.c1);
-		auto pp2 = ConvertCoordFromPositionToPixel(line.c2);
+		if (line.DependsOn() && (!display_active || IsRunwayActive(*line.DependsOn())))
+			continue;
+		auto pp1 = ConvertCoordFromPositionToPixel(line.C1());
+		auto pp2 = ConvertCoordFromPositionToPixel(line.C2());
 		MoveToEx(hDC, pp1.x, pp1.y, nullptr);
 		LineTo(hDC, pp2.x, pp2.y);
 	}
 }
 
-std::unique_ptr<CCoordinate> CESCenterlinesScreen::GetFixCoordinate(const std::string & name, const CCoordinate & threshold)
+std::unique_ptr<CCoordinate> CESCenterlinesScreen::GetFixCoordinate(const std::string& name, const CCoordinate& threshold)
 {
 	if (!name.length())
 		return nullptr;
@@ -110,7 +127,7 @@ void CESCenterlinesScreen::InitAsrSettings()
 		display_active = false;
 }
 
-bool CESCenterlinesScreen::IsRunwayActive(const Identifier & identifier) const
+bool CESCenterlinesScreen::IsRunwayActive(const Identifier& identifier) const
 {
 	for (auto & id : active_runways)
 		if (id == identifier)
@@ -126,14 +143,8 @@ void CESCenterlinesScreen::LoadRunwayData()
 	{
 		for (auto i = 0; i < 2; ++i)
 		{
-			std::unique_ptr<CRunway> runway = CRunway::CreateRunway(se, i);
-			if (runway)
-			{
-				centerline_settings.GetCenterlineSettings(*runway);
-				geographic.CalculateExtendedCenterline(*runway, GetFixCoordinate(runway->extended_centerline.final_approach_fix, runway->threshold).get());
-				centerline_settings.RemoveFap(runway->identifier, runway->calculated_approach_course);
-				runways.push_back(std::move(runway));
-			}
+			Identifier id(se.GetAirportName(), se.GetRunwayName(i));
+			runways.push_back(std::make_unique<CRunway>(id, se, i));
 		}
 	}
 }
@@ -148,12 +159,7 @@ void CESCenterlinesScreen::RefreshActiveRunways()
 	{
 		for (auto i = 0; i < 2; ++i)
 			if (se.IsElementActive(false, i))
-			{
-				std::string airport = se.GetAirportName();
-				airport.resize(4);
-				std::string runway = se.GetRunwayName(i);
-				active_runways.push_back(Identifier(airport, runway));
-			}	
+				active_runways.push_back(Identifier(se.GetAirportName(), se.GetRunwayName(i)));
 	}
 	RefreshMapContent();
 }
