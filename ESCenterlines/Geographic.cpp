@@ -10,11 +10,11 @@ CGeographic::~CGeographic()
 {
 }
 
-void CGeographic::CalculateExtendedCenterline(const CRunway& runway, CExtendedCenterline& cl, const CCoordinate* coordinate, std::vector<CLine>& l)
+void CGeographic::CalculateExtendedCenterline(const CRunway& runway, CExtendedCenterline* cl, const CCoordinate* coordinate, std::vector<std::unique_ptr<CLine>>& l)
 {
 	double course { 0 };
-	if (!(course = cl.GetCourse()))
-		course = cl.SetCourse(CalculateApproachCourse(runway, coordinate));
+	if (!(course = cl->GetCourse()))
+		course = cl->SetCourse(CalculateApproachCourse(runway, coordinate));
 	CalculateCenterline(runway, cl, l, course);
 	CalculateRangeTicks(runway, cl, l, course);
 }
@@ -38,10 +38,10 @@ double CGeographic::GetDistance(const CCoordinate& c1, const CCoordinate & c2)
 	return 0.0;
 }
 
-void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCenterline& centerline, std::vector<CLine>& l, double course)
+void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l, double course)
 {
 	auto pos = 0.0;
-	for (auto & cl : centerline.GetElements())
+	for (auto & cl : centerline->GetElements())
 	{
 		auto pattern_length = cl.dash_length + cl.gap_length;
 		for (auto i = 0; i < cl.number; ++i)
@@ -52,35 +52,35 @@ void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCent
 			auto line_end = line_start + cl.dash_length;
 			auto c1 = GetCoordinate(runway.GetThresholdPosition(), course, line_start * GeographicLib::Constants::nauticalmile());
 			auto c2 = GetCoordinate(runway.GetThresholdPosition(), course, line_end * GeographicLib::Constants::nauticalmile());
-			l.push_back(CLine(runway.GetId(), c1, c2));
+			l.push_back(std::make_unique<CLine>(runway.GetId(), c1, c2));
 		}
 		pos += pattern_length * cl.number;
 	}
 }
 
-void CGeographic::CalculateRangeTicks(const CRunway& runway, const CExtendedCenterline& centerline, std::vector<CLine>& l, double course)
+void CGeographic::CalculateRangeTicks(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l, double course)
 {
-	for (auto & rt : centerline.GetMarkers())
+	for (auto & rt : centerline->GetMarkers())
 	{
 		auto tick_azimuth_left = course - 90;
 		auto c_base = GetCoordinate(runway.GetThresholdPosition(), course, rt.dist_thr * GeographicLib::Constants::nauticalmile());
 		if (rt.direction == Direction::left || rt.direction == Direction::both)
 		{
-			auto c1_left = GetCoordinate(c_base, tick_azimuth_left, rt.dist_cl * GeographicLib::Constants::nauticalmile());
-			auto c2_left = GetCoordinate(c1_left, tick_azimuth_left, rt.length * GeographicLib::Constants::nauticalmile());
+			auto c1_left = GetCoordinate(c_base, tick_azimuth_left, -rt.dist_cl * GeographicLib::Constants::nauticalmile());
+			auto c2_left = GetCoordinate(c1_left, tick_azimuth_left, -rt.length * GeographicLib::Constants::nauticalmile());
 			if (rt.depends_on)
-				l.push_back(CLine(runway.GetId(), c1_left, c2_left, *rt.depends_on));
+				l.push_back(std::make_unique<CLine>(runway.GetId(), c1_left, c2_left, *rt.depends_on));
 			else
-				l.push_back(CLine(runway.GetId(), c1_left, c2_left));
+				l.push_back(std::make_unique<CLine>(runway.GetId(), c1_left, c2_left));
 		}
 		if (rt.direction == Direction::right || rt.direction == Direction::both)
 		{
-			auto c1_right = GetCoordinate(c_base, tick_azimuth_left, -rt.dist_cl * GeographicLib::Constants::nauticalmile());
-			auto c2_right = GetCoordinate(c1_right, tick_azimuth_left, -rt.length * GeographicLib::Constants::nauticalmile());
+			auto c1_right = GetCoordinate(c_base, tick_azimuth_left, rt.dist_cl * GeographicLib::Constants::nauticalmile());
+			auto c2_right = GetCoordinate(c1_right, tick_azimuth_left, rt.length * GeographicLib::Constants::nauticalmile());
 			if (rt.depends_on)
-				l.push_back(CLine(runway.GetId(), c1_right, c2_right, *rt.depends_on));
+				l.push_back(std::make_unique<CLine>(runway.GetId(), c1_right, c2_right, *rt.depends_on));
 			else
-				l.push_back(CLine(runway.GetId(), c1_right, c2_right));
+				l.push_back(std::make_unique<CLine>(runway.GetId(), c1_right, c2_right));
 		}
 	}
 }

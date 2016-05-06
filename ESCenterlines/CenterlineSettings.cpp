@@ -3,13 +3,13 @@
 
 
 CCenterlineSettings::CCenterlineSettings()
+	:default_centerline(default_identifier)
 {
-	default_centerline = std::make_unique<CExtendedCenterline>(Identifier("*", "*"));
-	default_centerline->AddElement(CenterlineElement(1, 1, 10, true));
-	default_centerline->AddElement(CenterlineElement(4, 1, 2, true));
-	default_centerline->AddMarker(CenterlineMarker(4, 0.5, 0.5, 0.0, Direction::both, nullptr));
-	default_centerline->AddMarker(CenterlineMarker(10, 0.5, 0.5, 0.0, Direction::both, nullptr));
-	default_centerline->AddMarker(CenterlineMarker(20, 0.5, 0.5, 0.0, Direction::both, nullptr));
+	default_centerline.AddElement(CenterlineElement { 1, 1, 10, true });
+	default_centerline.AddElement(CenterlineElement { 5, 1, 2, true });
+	default_centerline.AddMarker(CenterlineMarker { 0, 4, 0.5, 0.5, Direction::both, nullptr });
+	default_centerline.AddMarker(CenterlineMarker { 0, 10, 0.5, 0.5, Direction::both, nullptr });
+	default_centerline.AddMarker(CenterlineMarker { 0, 20, 0.5, 0.5, Direction::both, nullptr });
 	Load();
 }
 
@@ -19,38 +19,12 @@ CCenterlineSettings::~CCenterlineSettings()
 	Save();
 }
 
-CExtendedCenterline& CCenterlineSettings::GetExtendedCenterline(const Identifier& id) const
+CExtendedCenterline* CCenterlineSettings::GetExtendedCenterline(const Identifier& id)
 {
-	//for (auto & m : memory)
-	//	if (m->first == runway.identifier)
-	//	{
-	//		runway.SetExtendedCenterline(m->second);
-	//		return;
-	//	}
-	//return CExtendedCenterline(Identifier("EDDT", "26R"));
-	return *default_centerline;
-}
-
-int CCenterlineSettings::Errors() const
-{
-	return file_errors.size();
-}
-
-void CCenterlineSettings::RemoveFap(Identifier & id, double course)
-{
-	//for (auto & m : memory)
-	//{
-	//	if (m->first == id)
-	//	{
-	//		m->second.final_approach_fix.clear();
-	//		m->second.course = course;
-	//	}
-	//}
-}
-
-std::vector<std::string> CCenterlineSettings::GetErrorStrings() const
-{
-	return file_errors;
+	for (auto & m : memory)
+		if (m->first == id)
+			return &m->second;
+	return &default_centerline;
 }
 
 void CCenterlineSettings::Load()

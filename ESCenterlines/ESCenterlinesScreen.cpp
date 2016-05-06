@@ -65,7 +65,7 @@ void CESCenterlinesScreen::CreateLines()
 	for (auto& r : runways)
 	{
 		auto cl = centerline_settings.GetExtendedCenterline(r->GetId());
-		auto fap = GetFixCoordinate(cl.GetFinalApproachFix(), r->GetThresholdPosition());
+		auto fap = GetFixCoordinate(cl->GetFinalApproachFix(), r->GetThresholdPosition());
 		geographic.CalculateExtendedCenterline(*r, cl, fap.get(), lines);
 	}
 }
@@ -85,12 +85,12 @@ void CESCenterlinesScreen::DrawLines(HDC & hDC)
 {
 	for (auto & line : lines)
 	{
-		if (display_active && !IsRunwayActive(line.GetId()))
+		if (display_active && !IsRunwayActive(line->GetId()))
 			continue;
-		if (line.DependsOn() && (!display_active || IsRunwayActive(*line.DependsOn())))
+		if (line->DependsOn() && (!display_active || IsRunwayActive(*line->DependsOn())))
 			continue;
-		auto pp1 = ConvertCoordFromPositionToPixel(line.C1());
-		auto pp2 = ConvertCoordFromPositionToPixel(line.C2());
+		auto pp1 = ConvertCoordFromPositionToPixel(line->C1());
+		auto pp2 = ConvertCoordFromPositionToPixel(line->C2());
 		MoveToEx(hDC, pp1.x, pp1.y, nullptr);
 		LineTo(hDC, pp2.x, pp2.y);
 	}
@@ -130,8 +130,10 @@ void CESCenterlinesScreen::InitAsrSettings()
 bool CESCenterlinesScreen::IsRunwayActive(const Identifier& identifier) const
 {
 	for (auto & id : active_runways)
+	{
 		if (id == identifier)
 			return true;
+	}
 	return false;
 }
 

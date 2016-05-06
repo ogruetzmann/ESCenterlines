@@ -38,7 +38,7 @@ private:
 	std::vector<std::unique_ptr<CRunway>> runways;
 	std::vector<std::unique_ptr<CExtendedCenterline>> centerlines;
 	std::vector<Identifier> active_runways;
-	std::vector<CLine> lines;
+	std::vector<std::unique_ptr<CLine>> lines;
 
 	CGeographic geographic;
 	CCenterlineSettings& centerline_settings;

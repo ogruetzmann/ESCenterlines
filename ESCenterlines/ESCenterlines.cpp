@@ -9,9 +9,6 @@ CESCenterlines::CESCenterlines()
 {
 	RegisterDisplayType("ES Centerlines", false, true, false, false);
 	GetSystemTimeAsFileTime(&ActiveRunwaysUpdateTime);
-	if (centerline_settings->Errors())
-		for (auto & e : centerline_settings->GetErrorStrings())
-			DisplayUserMessage(GetPlugInName(), "File Error", e.c_str(), true, true, true, false, false);
 }
 
 

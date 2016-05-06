@@ -17,3 +17,4 @@ bool Identifier::operator==(const Identifier& id) const
 	return id.airport_designator == airport_designator
 		&& id.runway_designator == runway_designator;
 }
+

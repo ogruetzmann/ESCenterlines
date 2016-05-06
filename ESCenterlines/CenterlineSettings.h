@@ -20,15 +20,12 @@ public:
 	CCenterlineSettings();
 	virtual ~CCenterlineSettings();
 
-	CExtendedCenterline& GetExtendedCenterline(const Identifier& id) const;
-	int Errors() const;
-
-	void RemoveFap(Identifier &id, double course);
-	std::vector<std::string> GetErrorStrings() const;
+	CExtendedCenterline* GetExtendedCenterline(const Identifier& id);
 	void Save(std::vector<std::unique_ptr<CRunway>> & runways);
 
 private:
-	std::unique_ptr<CExtendedCenterline> default_centerline { nullptr };
+	Identifier default_identifier { "*", "*" };
+	CExtendedCenterline default_centerline;
 	std::vector<std::unique_ptr<ecl_object>> memory;
 	std::vector<std::string> file_errors;
 
