@@ -3,7 +3,7 @@
 
 
 CCenterlineSettings::CCenterlineSettings()
-	:default_centerline(default_identifier)
+	: default_centerline(default_identifier)
 {
 	default_centerline.AddElement(CenterlineElement { 1, 1, 10, true });
 	default_centerline.AddElement(CenterlineElement { 5, 1, 2, true });
@@ -22,46 +22,48 @@ CCenterlineSettings::~CCenterlineSettings()
 CExtendedCenterline* CCenterlineSettings::GetExtendedCenterline(const Identifier& id)
 {
 	for (auto & m : memory)
-		if (m->first == id)
-			return &m->second;
+		if (m->GetIdentifier() == id)
+			return m.get();
 	return &default_centerline;
 }
 
 void CCenterlineSettings::Load()
 {
-	//std::unique_ptr<Json::Value> j_runways = std::make_unique<Json::Value>(Json::arrayValue);
-	//LoadFromFile(*j_runways);
-	//for (auto & j : *j_runways)
-	//{
-	//	std::unique_ptr<ecl_object> runway = std::make_unique<ecl_object>();
-	//	runway->first.airport_designator = j.get("airport", "").asString();
-	//	runway->first.runway_designator = j.get("runway", "").asString();
-	//	runway->second.final_approach_fix = j.get("fap", "").asString();
-	//	if (j.get("course", 0).isDouble())
-	//		runway->second.course = j.get("course", 0).asDouble();
-	//	Json::Value markers = j.get("cl_markers", Json::nullValue);
-	//	if (markers.isArray())
-	//	{
-	//		std::vector<CRangeTick> rt;
-	//		if (ReadFromJson(markers, rt))
-	//			for (auto & v : rt)
-	//				runway->second.AddRangeTick(v);
-	//		else
-	//			continue;
-	//	}
+	std::unique_ptr<Json::Value> j_runways = std::make_unique<Json::Value>(Json::arrayValue);
+	LoadFromFile(*j_runways);
+	for (auto & j : *j_runways)
+	{
+		Identifier id = GetId(j);
+		if (!id.size())
+			continue;
+		if (id == default_identifier)
+			continue; // ToDo: Save to default runway;
 
-	//	Json::Value elements = j.get("cl_elements", Json::nullValue);
-	//	if (elements.isArray())
-	//	{
-	//		std::vector<CCenterlineElement> ce;
-	//		if (ReadFromJson(elements, ce))
-	//			for (auto & v : ce)
-	//				runway->second.AddElement(v);
-	//		else
-	//			continue;
-	//	}
-	//	memory.push_back(std::move(runway));
-	//}
+		std::unique_ptr<CExtendedCenterline> runway = std::make_unique<CExtendedCenterline>(id);
+
+		Json::Value jval;
+		if ((jval = j.get(COURSE, 0)).isDouble())
+			runway->SetCourse(jval.asDouble());
+		if ((jval = j.get(FAP, "")).isString())
+			runway->SetFinalApproachFix(jval.asString());
+
+		if ((jval = j.get(MARKERS, Json::nullValue)).isArray())
+		{
+			std::vector<CenterlineMarker> clm;
+			clm = GetMarkers(jval);
+			for (auto &m : clm)
+				runway->AddMarker(std::move(m));
+		}
+		if ((jval = j.get(ELEMENTS, Json::nullValue)).isArray())
+		{
+			std::vector<CenterlineElement> cle;
+			cle = GetElements(jval);
+			for (auto &e : cle)
+				runway->AddElement(std::move(e));
+		}
+
+		memory.push_back(std::move(runway));
+	}
 }
 
 void CCenterlineSettings::Save()
@@ -70,6 +72,85 @@ void CCenterlineSettings::Save()
 	//{
 
 	//}
+}
+
+Identifier CCenterlineSettings::GetId(Json::Value & j)
+{
+	Json::Value jval;
+	std::string airport_name {}, runway_name {};
+	if ((jval = j.get(AIRPORT, "")).isString())
+		airport_name = j.get(AIRPORT, "").asString();
+	if ((jval = j.get(RUNWAY, "")).isString())
+		runway_name = j.get(RUNWAY, "").asString();
+	Identifier id(airport_name, runway_name);
+	return id;
+}
+
+std::vector<CenterlineElement> CCenterlineSettings::GetElements(Json::Value & j_arr)
+{
+	std::vector<CenterlineElement> cle;
+	for (auto &j : j_arr)
+	{
+		Json::Value jval;
+		double dash { 0 };
+		double gap { 0 };
+		int number { 0 };
+		bool starts_gap { true };
+		
+		if ((jval = j.get(DASH, 0.0)).isDouble())
+			dash = jval.asDouble();
+		if ((jval = j.get(GAP, 0.0)).isDouble())
+			gap = jval.asDouble();
+		if ((jval = j.get(NUMBER, 0.0)).isInt())
+			number = jval.asInt();
+		if ((jval = j.get(STARTS_GAP, 0.0)).isBool())
+			starts_gap = jval.asBool();
+		cle.push_back(CenterlineElement { dash, gap, number, starts_gap });
+	}
+	return cle;
+}
+
+std::vector<CenterlineMarker> CCenterlineSettings::GetMarkers(Json::Value & j_arr)
+{
+	std::vector<CenterlineMarker> clm;
+	for (auto &j : j_arr)
+	{
+		Json::Value jval;
+		double angle { 0 };
+		double dist_cl { 0 };
+		double dist_thr { 0 };
+		double length { 0 };
+		Direction direction { Direction::both };
+		std::string depends_airport {};
+		std::string depends_runway {};
+
+		if ((jval = j.get(ANGLE, 0.0)).isDouble())
+			angle = jval.asDouble();
+		if ((jval = j.get(DIST_CL, 0.0)).isDouble())
+			dist_cl = jval.asDouble();
+		if ((jval = j.get(DIST_THR, 0.0)).isDouble())
+			dist_thr = jval.asDouble();
+		if ((jval = j.get(LENGTH, 0.0)).isDouble())
+			length = jval.asDouble();
+		if ((jval = j.get(DIRECTION, 0)).isInt())
+		{
+			auto i = jval.asInt();
+			if (i >= 0 && i <= 2)
+				direction = Direction(i);
+			else
+				direction = Direction::both;
+		}
+		if ((jval = j.get(DEPENDS_APT, "")).isString())
+			depends_airport = jval.asString();
+		if ((jval = j.get(DEPENDS_RWY, "")).isString())
+			depends_runway = jval.asString();
+
+		if (!(depends_airport.length() + depends_runway.length()))
+			clm.push_back(CenterlineMarker { angle, dist_thr, dist_cl, length, direction, nullptr });
+		else
+			clm.push_back(CenterlineMarker { angle, dist_thr, dist_cl, length, direction, std::make_unique<Identifier>(depends_airport, depends_runway) });
+	}
+	return clm;
 }
 
 void CCenterlineSettings::Save(std::vector<std::unique_ptr<CRunway>>& runways)
