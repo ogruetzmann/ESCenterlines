@@ -3,14 +3,10 @@
 
 
 CCenterlineSettings::CCenterlineSettings()
-	: default_centerline(default_identifier)
 {
-	default_centerline.AddElement(CenterlineElement { 1, 1, 10, true });
-	default_centerline.AddElement(CenterlineElement { 5, 1, 2, true });
-	default_centerline.AddMarker(CenterlineMarker { 0, 4, 0.5, 0.5, Direction::both, nullptr });
-	default_centerline.AddMarker(CenterlineMarker { 0, 10, 0.5, 0.5, Direction::both, nullptr });
-	default_centerline.AddMarker(CenterlineMarker { 0, 20, 0.5, 0.5, Direction::both, nullptr });
 	Load();
+	SetDefault();
+
 }
 
 
@@ -24,7 +20,15 @@ CExtendedCenterline* CCenterlineSettings::GetExtendedCenterline(const Identifier
 	for (auto & m : memory)
 		if (m->GetIdentifier() == id)
 			return m.get();
-	return &default_centerline;
+	return default_centerline.get();
+}
+
+void CCenterlineSettings::Reload()
+{
+	default_centerline.release();
+	memory.clear();
+	Load();
+	SetDefault();
 }
 
 void CCenterlineSettings::Load()
@@ -33,14 +37,23 @@ void CCenterlineSettings::Load()
 	LoadFromFile(*j_runways);
 	for (auto & j : *j_runways)
 	{
+		bool default_line { false };
 		Identifier id = GetId(j);
+		std::unique_ptr<CExtendedCenterline> centerline;
+		CExtendedCenterline* runway { nullptr };
 		if (!id.size())
 			continue;
 		if (id == default_identifier)
-			continue; // ToDo: Save to default runway;
-
-		std::unique_ptr<CExtendedCenterline> runway = std::make_unique<CExtendedCenterline>(id);
-
+		{
+			default_line = true;
+			default_centerline = std::make_unique<CExtendedCenterline>(id);
+			runway = default_centerline.get();
+		}
+		else
+		{
+			centerline = std::make_unique<CExtendedCenterline>(id);
+			runway = centerline.get();
+		}
 		Json::Value jval;
 		if ((jval = j.get(COURSE, 0)).isDouble())
 			runway->SetCourse(jval.asDouble());
@@ -62,7 +75,8 @@ void CCenterlineSettings::Load()
 				runway->AddElement(std::move(e));
 		}
 
-		memory.push_back(std::move(runway));
+		if (centerline)
+			memory.push_back(std::move(centerline));
 	}
 }
 
@@ -151,6 +165,18 @@ std::vector<CenterlineMarker> CCenterlineSettings::GetMarkers(Json::Value & j_ar
 			clm.push_back(CenterlineMarker { angle, dist_thr, dist_cl, length, direction, std::make_unique<Identifier>(depends_airport, depends_runway) });
 	}
 	return clm;
+}
+
+void CCenterlineSettings::SetDefault()
+{
+	if (!default_centerline)
+	{
+		default_centerline = std::make_unique<CExtendedCenterline>(default_identifier);
+		default_centerline->AddElement(CenterlineElement { 1, 1, 10, true });
+		default_centerline->AddMarker(CenterlineMarker { 0, 4, 0.5, 0.5, Direction::both, nullptr });
+		default_centerline->AddMarker(CenterlineMarker { 0, 10, 0.5, 0.5, Direction::both, nullptr });
+		default_centerline->AddMarker(CenterlineMarker { 0, 20, 0.5, 0.5, Direction::both, nullptr });
+	}
 }
 
 void CCenterlineSettings::Save(std::vector<std::unique_ptr<CRunway>>& runways)

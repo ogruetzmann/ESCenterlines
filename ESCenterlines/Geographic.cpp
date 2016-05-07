@@ -12,11 +12,19 @@ CGeographic::~CGeographic()
 
 void CGeographic::CalculateExtendedCenterline(const CRunway& runway, CExtendedCenterline* cl, const CCoordinate* coordinate, std::vector<std::unique_ptr<CLine>>& l)
 {
-	double course { 0 };
-	if (!(course = cl->GetCourse()))
-		course = cl->SetCourse(CalculateApproachCourse(runway, coordinate));
-	CalculateCenterline(runway, cl, l, course);
-	CalculateRangeTicks(runway, cl, l, course);
+	auto course { 0.0 };
+	auto threshold = runway.GetThresholdPosition();
+	
+	if (coordinate)
+		geodesic_line = geodesic.InverseLine(threshold.m_Latitude, threshold.m_Longitude, coordinate->m_Latitude, coordinate->m_Longitude);
+	else
+	{
+		if (!(course = cl->GetCourse()))
+			course = GetAzimuth(runway.GetThresholdPosition(), runway.GetStopEndPosition());
+		geodesic_line = geodesic.Line(threshold.m_Latitude, threshold.m_Longitude, course + 180);
+	}
+	CalculateCenterline(runway, cl, l);
+	CalculateRangeTicks(runway, cl, l);
 }
 
 double CGeographic::GetAzimuth(const CCoordinate & c1, const CCoordinate & c2)
@@ -33,12 +41,19 @@ CCoordinate CGeographic::GetCoordinate(CCoordinate c1, double azimuth, double di
 	return CCoordinate(lat2, lon2);
 }
 
+CCoordinate CGeographic::GetCoordinate(double distance)
+{
+	CCoordinate coord {};
+	geodesic_line.Position(distance, coord.m_Latitude, coord.m_Longitude);
+	return coord;
+}
+
 double CGeographic::GetDistance(const CCoordinate& c1, const CCoordinate & c2)
 {
 	return 0.0;
 }
 
-void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l, double course)
+void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l)
 {
 	auto pos = 0.0;
 	for (auto & cl : centerline->GetElements())
@@ -50,20 +65,20 @@ void CGeographic::CalculateCenterline(const CRunway& runway, const CExtendedCent
 			if (cl.starts_gap)
 				line_start += cl.gap_length;
 			auto line_end = line_start + cl.dash_length;
-			auto c1 = GetCoordinate(runway.GetThresholdPosition(), course, line_start * GeographicLib::Constants::nauticalmile());
-			auto c2 = GetCoordinate(runway.GetThresholdPosition(), course, line_end * GeographicLib::Constants::nauticalmile());
+			auto c1 = GetCoordinate(line_start * GeographicLib::Constants::nauticalmile());
+			auto c2 = GetCoordinate(line_end * GeographicLib::Constants::nauticalmile());
 			l.push_back(std::make_unique<CLine>(runway.GetId(), c1, c2));
 		}
 		pos += pattern_length * cl.number;
 	}
 }
 
-void CGeographic::CalculateRangeTicks(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l, double course)
+void CGeographic::CalculateRangeTicks(const CRunway& runway, const CExtendedCenterline* centerline, std::vector<std::unique_ptr<CLine>>& l)
 {
 	for (auto & rt : centerline->GetMarkers())
 	{
-		auto tick_azimuth_left = course - 90;
-		auto c_base = GetCoordinate(runway.GetThresholdPosition(), course, rt.dist_thr * GeographicLib::Constants::nauticalmile());
+		auto tick_azimuth_left = geodesic_line.Azimuth() - 90;
+		auto c_base = GetCoordinate(rt.dist_thr * GeographicLib::Constants::nauticalmile());
 		if (rt.direction == Direction::left || rt.direction == Direction::both)
 		{
 			auto c1_left = GetCoordinate(c_base, tick_azimuth_left, -rt.dist_cl * GeographicLib::Constants::nauticalmile());
@@ -85,10 +100,3 @@ void CGeographic::CalculateRangeTicks(const CRunway& runway, const CExtendedCent
 	}
 }
 
-double CGeographic::CalculateApproachCourse(const CRunway& runway, const CCoordinate* coordinate)
-{
-	if (coordinate)
-		return GetAzimuth(runway.GetThresholdPosition(), *coordinate);
-	else
-		return GetAzimuth(runway.GetThresholdPosition(), runway.GetStopEndPosition()) + 180;
-}

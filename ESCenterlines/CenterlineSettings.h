@@ -20,6 +20,7 @@ public:
 	virtual ~CCenterlineSettings();
 
 	CExtendedCenterline* GetExtendedCenterline(const Identifier& id);
+	void Reload();
 	void Save(std::vector<std::unique_ptr<CRunway>> & runways);
 
 private:
@@ -42,7 +43,7 @@ private:
 	const std::string NUMBER = "number";
 
 	Identifier default_identifier { "*", "*" };
-	CExtendedCenterline default_centerline;
+	std::unique_ptr<CExtendedCenterline> default_centerline;
 	std::vector<std::unique_ptr<CExtendedCenterline>> memory;
 	std::vector<std::string> file_errors;
 
@@ -51,6 +52,7 @@ private:
 	Identifier GetId(Json::Value& j);
 	std::vector<CenterlineElement> GetElements(Json::Value& j);
 	std::vector<CenterlineMarker> GetMarkers(Json::Value& j);
+	void SetDefault();
 	//Json::Value ConvertToJson(const std::vector<CRangeTick> &rt);
 	//Json::Value ConvertToJson(const std::vector<CCenterlineElement> &rt);
 	//bool ReadFromJson(const Json::Value & jv, std::vector<CRangeTick> & rt);

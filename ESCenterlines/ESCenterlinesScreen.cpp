@@ -49,6 +49,14 @@ bool CESCenterlinesScreen::OnCompileCommand(const char * sCommandLine)
 		//centerline_settings.Save(runways);
 		return true;
 	}
+	if (!strcmp(sCommandLine, ".cline reload"))
+	{
+		centerline_settings.Reload();
+		LoadRunwayData();
+		CreateLines();
+		RefreshActiveRunways();
+		return true;
+	}
 	return false;
 }
 
@@ -62,6 +70,7 @@ void CESCenterlinesScreen::OnRefresh(HDC hDC, int Phase)
 
 void CESCenterlinesScreen::CreateLines()
 {
+	lines.clear();
 	for (auto& r : runways)
 	{
 		auto cl = centerline_settings.GetExtendedCenterline(r->GetId());
@@ -139,6 +148,7 @@ bool CESCenterlinesScreen::IsRunwayActive(const Identifier& identifier) const
 
 void CESCenterlinesScreen::LoadRunwayData()
 {
+	runways.clear();
 	for (auto se = GetPlugIn()->SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 		 se.IsValid();
 		 se = GetPlugIn()->SectorFileElementSelectNext(se, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
