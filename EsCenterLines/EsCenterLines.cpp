@@ -40,8 +40,7 @@ void EsCenterLines::ReadRunways()
 			std::string runway = element.GetRunwayName(i);
 			auto active_arr = element.IsElementActive(false, i);
 			auto active_dep = element.IsElementActive(true, i);
-			Runway rwy(std::move(airport), std::move(runway), threshold[!i?0:1], threshold[i?0:1], active_arr, active_dep);
-			runways.push_back(std::move(rwy));
+			runways.push_back(Runway (std::move(airport), std::move(runway), threshold[!i ? 0 : 1], threshold[i ? 0 : 1], active_arr, active_dep));
 		}
 	}
 }
