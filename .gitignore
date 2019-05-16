@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/EsCenterLines/ipaddr.txt
+/EsCenterLines/version.txt
