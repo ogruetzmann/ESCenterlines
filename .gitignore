@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /EsCenterLines/ipaddr.txt
 /EsCenterLines/version.txt
+/EsCenterLines/SectorFileProviderDescriptor.txt
+/EsCenterLines/euroscope_sector_providers.txt
