@@ -145,7 +145,6 @@
   <ItemGroup>
     <ClInclude Include="CenterLinesScreen.h" />
     <ClInclude Include="Coordinate.h" />
-    <ClInclude Include="DrawResources.h" />
     <ClInclude Include="EsCenterLines.h" />
     <ClInclude Include="EsHelpers.h" />
     <ClInclude Include="Runway.h" />

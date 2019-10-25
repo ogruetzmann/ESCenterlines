@@ -13,3 +13,10 @@ struct Coordinate
 	}
 };
 
+struct CLine
+{
+	Coordinate start;
+	Coordinate end;
+	Coordinate rotation{ 0,0 };
+};
+

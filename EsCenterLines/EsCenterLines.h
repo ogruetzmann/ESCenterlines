@@ -18,10 +18,15 @@ public:
 	virtual ~EsCenterLines();
 
 private:
-	std::list<Runway> runways;
+	std::list<Runway_Definition> runways;
+	std::list<CLine> lines;
+	std::list<CLine> ticks;
 
-	void OnAirportRunwayActivityChanged();
 	EuroScopePlugIn::CRadarScreen *OnRadarScreenCreated(const char *sDisplayName, bool NeedRadarContent, bool GeoReferenced, bool CanBeSaved, bool CanBeCreated);
+	void OnAirportRunwayActivityChanged();
+	void CalculateCenterlines();
+	void CalculateLine(std::list<Line_Definition> &ld, Coordinate &threshold, double track);
+	void CalculateTicks(std::list<Tick_Definition> &td, Coordinate &threshold, double track);
 	void ReadRunways();
 
 };
