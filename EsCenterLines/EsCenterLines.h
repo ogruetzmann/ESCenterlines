@@ -27,6 +27,7 @@ private:
 	void CalculateCenterlines();
 	void CalculateLine(std::list<Line_Definition> &ld, Coordinate &threshold, double track);
 	void CalculateTicks(std::list<Tick_Definition> &td, Coordinate &threshold, double track);
+	void CalculateMunichSpecial(const Runway_Definition &rd);
 	void ReadRunways();
 
 };

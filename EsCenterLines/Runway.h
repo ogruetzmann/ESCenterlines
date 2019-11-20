@@ -12,12 +12,15 @@ struct Line_Definition
 	bool starts_with_line{ false };
 };
 
+enum class Direction { both = 0, left, right };
+
 struct Tick_Definition
 {
 	double tick_length{ 0.5 };
 	double tick_angle{ 90 };
 	double tick_distance_from_centerline{ 0.5 };
 	double tick_distance_from_threshold{ 4 };
+	Direction tick_direction { Direction::both };
 };
 
 struct Runway_Definition
@@ -31,6 +34,7 @@ struct Runway_Definition
 	double runway_heading{ 0.0 };
 	double runway_heading_calculated{ 0.0 };
 	std::string approach_fix{};
-	std::list<Tick_Definition> ticks{ { Tick_Definition()}, {0.5,90,0.5,10 }, {0.5,90,0.5,20} };
-	std::list<Line_Definition> line_parts{ Line_Definition() };
+	std::list<Tick_Definition> ticks;
+	std::list<Line_Definition> line_parts;
 };
+
