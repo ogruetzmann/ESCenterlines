@@ -5,7 +5,6 @@
 #include <EuroScopePlugIn.h>
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/GeodesicLine.hpp>
-#include <GeographicLib/Rhumb.hpp>
 #include <GeographicLib/Math.hpp>
 #include "Runway.h"
 #include "EsHelpers.h"
@@ -29,6 +28,7 @@ private:
 	void CalculateLine(std::list<Line_Definition> &ld, Coordinate &threshold, double track);
 	void CalculateTicks(std::list<Tick_Definition> &td, Coordinate &threshold, double track);
 	void CalculateMunichSpecial(const Runway_Definition &rd);
+	bool GetFixPosition(Coordinate &coord, const Runway_Definition &rwy);
 	double NauticalMiles(double meters);
 	void ReadRunways();
 

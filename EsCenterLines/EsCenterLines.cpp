@@ -151,6 +151,27 @@ void EsCenterLines::CalculateMunichSpecial(const Runway_Definition &rd)
 	}
 }
 
+bool EsCenterLines::GetFixPosition(Coordinate &coord, const Runway_Definition &rwy)
+{
+	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_FIX);
+	for (auto x : container)
+	{
+		if (!strcmp(x.GetName(), rwy.approach_fix.c_str()))
+		{
+			EuroScopePlugIn::CPosition position, thr_position;
+			x.GetPosition(&position, 0);
+			thr_position.m_Latitude = rwy.runway_threshold.latitude;
+			thr_position.m_Longitude = rwy.runway_threshold.longitude;
+			if (position.DistanceTo(thr_position) > 30)
+				continue;
+			coord.latitude = position.m_Latitude;
+			coord.longitude = position.m_Longitude;
+			return true;
+		}
+	}
+	return false;
+}
+
 double EsCenterLines::NauticalMiles(double nm)
 {
 	return nm * GeographicLib::Constants::nauticalmile();
@@ -159,34 +180,69 @@ double EsCenterLines::NauticalMiles(double nm)
 void EsCenterLines::ReadRunways()
 {
 	runways.clear();
-	GeographicLib::GeodesicLine line(geo, 0, 0, 0, GeographicLib::GeodesicLine::AZIMUTH);
 	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 	for (auto x : container)
 	{
-		Runway_Definition rwy;
 		for (int i = 0; i < 2; ++i)
 		{
+			Runway_Definition rwy;
 			rwy.airport_name = x.GetAirportName();
 			rwy.runway_designator = x.GetRunwayName(i);
+			if (rwy.airport_name.starts_with("EDDM"))
+			{
+				if (rwy.runway_designator == "08L")
+				{
+					rwy.approach_fix = "MAGAT";
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left));
+				}
+				else if (rwy.runway_designator == "08R")
+				{
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right));
+					rwy.approach_fix = "BEGEN";
+				}
+				else if (rwy.runway_designator == "26R")
+				{
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right));
+					rwy.approach_fix = "GUDEG";
+				}
+				else if (rwy.runway_designator == "26L")
+				{
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left));
+					rwy.approach_fix = "NELBI";
+				}
+			}
 			rwy.runway_heading = x.GetRunwayHeading(i);
 			EuroScopePlugIn::CPosition thr, end;
 			x.GetPosition(&thr, i);
 			x.GetPosition(&end, i == 1 ? 0 : 1);
 			rwy.runway_threshold = { thr.m_Latitude, thr.m_Longitude };
 			rwy.runway_end = { end.m_Latitude, end.m_Longitude };
+			Coordinate coord;
+			if (rwy.approach_fix.length() != 0 && GetFixPosition(coord, rwy))
+			{
+				double azi1, azi2;
+				geo.Inverse(coord.latitude, coord.longitude, rwy.runway_threshold.latitude, rwy.runway_threshold.longitude, azi1, azi2);
+				rwy.runway_heading_calculated = azi2;
+			}
+			else
+			{
+				double azi1, azi2;
+				geo.Inverse(rwy.runway_threshold.latitude, rwy.runway_threshold.longitude, rwy.runway_end.latitude, rwy.runway_end.longitude, azi1, azi2);
+				rwy.runway_heading_calculated = (azi1 + azi2) / 2;
+			}
 			rwy.active_arrival = x.IsElementActive(false, i);
 			rwy.active_departure = x.IsElementActive(true, i);
-			double azi1, azi2;
-			geo.Inverse(rwy.runway_threshold.latitude, rwy.runway_threshold.longitude, rwy.runway_end.latitude, rwy.runway_end.longitude, azi1, azi2);
-			auto azi3 = (azi1 + azi2) / 2;
-			//rwy.runway_heading_calculated = line.Azimuth();
-			rwy.runway_heading_calculated = azi2;
-			rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right });
 			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 12, Direction::both));
 			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 15, Direction::both));
 			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 22, Direction::both));
-			rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right));
-			rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right));
 			rwy.line_parts.push_back(Line_Definition(1, 1, 14, 0, false));
 			runways.push_back(rwy);
 		}

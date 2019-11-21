@@ -27,8 +27,13 @@ void CenterLinesScreen::OnRefresh(HDC hDC, int phase)
 	if (phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
 	{
 		DrawRectangle(hDC);
-		DrawCenterlines(hDC);
+		//DrawCenterlines(hDC);
 	}
+}
+
+bool CenterLinesScreen::OnCompileCommand(const char *sCommandLine)
+{
+	return false;
 }
 
 void CenterLinesScreen::DrawRectangle(HDC hDC)

@@ -30,6 +30,7 @@ private:
 	void OnAsrContentLoaded(bool loaded);
 	void OnAsrContentToBeClosed();
 	void OnRefresh(HDC hDC, int phase);
+	bool OnCompileCommand(const char *sCommandLine);
 
 	void DrawRectangle(HDC hDC);
 	void DrawCenterlines(HDC hDC);
