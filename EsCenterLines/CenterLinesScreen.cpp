@@ -5,9 +5,12 @@ CenterLinesScreen::CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &
 {
 	auto hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
 	hr = pD2DFactory->CreateDCRenderTarget(&rt_properties, &render_target);
-	render_target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Gray), &pBlackBrush);
-	render_target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &pRedBrush);
-	render_target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Green), &pGreenBrush);
+	D2D1_COLOR_F clcolor;
+	clcolor.r = float(180) / float(255);
+	clcolor.g = float(180) / float(255);
+	clcolor.b = float(180) / float(255);
+	clcolor.a = 1;
+	render_target->CreateSolidColorBrush(clcolor, &pBlackBrush);
 }
 
 void CenterLinesScreen::OnAsrContentLoaded(bool loaded)

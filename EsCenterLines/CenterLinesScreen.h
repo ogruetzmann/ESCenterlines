@@ -24,8 +24,6 @@ private:
 	ID2D1Factory *pD2DFactory{ nullptr };
 	ID2D1DCRenderTarget *render_target{ nullptr };
 	ID2D1SolidColorBrush *pBlackBrush{ nullptr };
-	ID2D1SolidColorBrush *pRedBrush{ nullptr };
-	ID2D1SolidColorBrush *pGreenBrush{ nullptr };
 	std::list<CLine> &lines;
 	std::list<CLine> &ticks;
 
