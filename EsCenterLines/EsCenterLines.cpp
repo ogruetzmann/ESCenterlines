@@ -188,12 +188,16 @@ void EsCenterLines::ReadRunways()
 	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
 	for (auto runway : container)
 	{
+#ifdef __EDDM
+		std::string name2 = runway.GetAirportName();
+		if (!name2.starts_with("EDDM"))
+			continue;
+#endif
 		bool apt_active_arrival{ false };
 		SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_AIRPORT);
 		for (auto airport : container)
 		{
 			auto name = airport.GetName();
-			auto name2 = runway.GetAirportName();
 			if (!strncmp(name, runway.GetAirportName(), strlen(name)))
 				apt_active_arrival = airport.IsElementActive(false);
 		}
