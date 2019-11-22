@@ -76,5 +76,12 @@ struct Runway_Settings
 	std::list<Tick_Settings> ticks;
 };
 
+struct Airport_Settings
+{
+	std::string airport;
+	std::list<Line_Settings> lines;
+	std::list<Tick_Settings> ticks;
+};
+
 static std::list<Tick_Definition> default_ticks{ {0.5, 90, 0.5, 4, Direction::both, false, false}, {0.5, 90, 0, 10, Direction::both, false, false}, {0.5, 90, 0, 20, Direction::both, false, false} };
 static std::list<Line_Definition> default_line{ {1, 1, 10, 0, false, false, false} };
