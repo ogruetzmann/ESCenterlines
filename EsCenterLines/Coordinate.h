@@ -17,5 +17,7 @@ struct CLine
 {
 	Coordinate start;
 	Coordinate end;
+	bool apt{ false };
+	bool rwy{ false };
 };
 

@@ -142,14 +142,16 @@
     <ClCompile Include="EsCenterLines.cpp" />
     <ClCompile Include="EsHelpers.cpp" />
     <ClCompile Include="PluginMain.cpp" />
-    <ClCompile Include="Runway.cpp" />
+    <ClCompile Include="Data.cpp" />
+    <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CenterLinesScreen.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="EsCenterLines.h" />
     <ClInclude Include="EsHelpers.h" />
-    <ClInclude Include="Runway.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

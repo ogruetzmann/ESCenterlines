@@ -1,7 +1,7 @@
 #include "EsCenterLines.h"
 
 const char *plugin_name{ "EsCenterLines" };
-const char *plugin_version{ "0.0" };
+const char *plugin_version{ "1.2" };
 const char *plugin_author{ "Oliver Grützmann" };
 const char *plugin_license{ "tbd" };
 
@@ -20,7 +20,11 @@ EsCenterLines::~EsCenterLines()
 EuroScopePlugIn::CRadarScreen *EsCenterLines::OnRadarScreenCreated(const char *sDisplayName, bool NeedRadarContent, bool GeoReferenced, bool CanBeSaved, bool CanBeCreated)
 {
 	if (GeoReferenced)
-		return new CenterLinesScreen(lines, ticks);
+	{
+		auto cls = new CenterLinesScreen(lines, ticks, screens);
+		screens.push_back(cls);
+		return cls;
+	}
 	return nullptr;
 }
 
@@ -28,6 +32,9 @@ void EsCenterLines::OnAirportRunwayActivityChanged()
 {
 	ReadRunways();
 	CalculateCenterlines();
+	for (auto x : screens)
+		x->RefreshMapContent();
+
 }
 
 void EsCenterLines::CalculateCenterlines()
@@ -36,8 +43,6 @@ void EsCenterLines::CalculateCenterlines()
 	ticks.clear();
 	for (auto x : runways)
 	{
-		if (!x.active_arrival)
-			continue;
 		auto track = x.runway_heading_calculated - 180;
 		CalculateLine(x.line_parts, x.runway_threshold, track);
 		CalculateTicks(x.ticks, x.runway_threshold, track);
@@ -61,7 +66,7 @@ void EsCenterLines::CalculateLine(std::list<Line_Definition> &ld, Coordinate &th
 			double lat, lon, lat2, lon2;
 			gd_line.Position(dist, lat, lon);
 			gd_line.Position(dist + ll, lat2, lon2);
-			lines.push_back({ { lat, lon }, { lat2, lon2 } });
+			lines.push_back({ { lat, lon }, { lat2, lon2 }, x.apt_active, x.rwy_active });
 			dist += glll;
 		}
 	}
@@ -85,7 +90,7 @@ void EsCenterLines::CalculateTicks(std::list<Tick_Definition> &td, Coordinate &t
 			Coordinate tick_left_start, tick_left_end;
 			tick_line.Position(dist_cl, tick_left_start.latitude, tick_left_start.longitude);
 			tick_line.Position(dist_cl + length, tick_left_end.latitude, tick_left_end.longitude);
-			ticks.push_back({ tick_left_start, tick_left_end });
+			ticks.push_back({ tick_left_start, tick_left_end, x.apt_active, x.rwy_active });
 		}
 
 		if (x.tick_direction == Direction::right || x.tick_direction == Direction::both)
@@ -94,7 +99,7 @@ void EsCenterLines::CalculateTicks(std::list<Tick_Definition> &td, Coordinate &t
 			Coordinate tick_right_start, tick_right_end;
 			tick_line.Position(dist_cl, tick_right_start.latitude, tick_right_start.longitude);
 			tick_line.Position(dist_cl + length, tick_right_end.latitude, tick_right_end.longitude);
-			ticks.push_back({ tick_right_start, tick_right_end });
+			ticks.push_back({ tick_right_start, tick_right_end, x.apt_active, x.rwy_active });
 		}
 	}
 }
@@ -118,9 +123,9 @@ void EsCenterLines::CalculateMunichSpecial(const Runway_Definition &rd)
 		f_line.Position(1.755 * GeographicLib::Constants::nauticalmile(), end.latitude, end.longitude);
 		f_line2.Position(1.755 * GeographicLib::Constants::nauticalmile(), end2.latitude, end2.longitude);
 		f_line3.Position(1.755 * GeographicLib::Constants::nauticalmile(), end3.latitude, end3.longitude);
-		lines.push_back({ origin, end });
-		lines.push_back({ origin2, end2 });
-		lines.push_back({ end, end3 });
+		lines.push_back({ origin, end, rd.apt_active_arrival, rd.active_arrival });
+		lines.push_back({ origin2, end2, rd.apt_active_arrival, rd.active_arrival });
+		lines.push_back({ end, end3, rd.apt_active_arrival, rd.active_arrival });
 	}
 	else if (rd.runway_designator == "26L")
 	{
@@ -141,9 +146,9 @@ void EsCenterLines::CalculateMunichSpecial(const Runway_Definition &rd)
 		f_line.Position(1.755 * GeographicLib::Constants::nauticalmile(), end.latitude, end.longitude);
 		f_line2.Position(1.755 * GeographicLib::Constants::nauticalmile(), end2.latitude, end2.longitude);
 		f_line3.Position(1.755 * GeographicLib::Constants::nauticalmile(), end3.latitude, end3.longitude);
-		lines.push_back({ origin, end });
-		lines.push_back({ origin2, end2 });
-		lines.push_back({ end, end3 });
+		lines.push_back({ origin, end, rd.apt_active_arrival, rd.active_arrival });
+		lines.push_back({ origin2, end2, rd.apt_active_arrival, rd.active_arrival });
+		lines.push_back({ end, end3, rd.apt_active_arrival, rd.active_arrival });
 	}
 	else if (rd.runway_designator == "08L")
 	{
@@ -181,48 +186,66 @@ void EsCenterLines::ReadRunways()
 {
 	runways.clear();
 	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
-	for (auto x : container)
+	for (auto runway : container)
 	{
+		bool apt_active_arrival{ false };
+		SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_AIRPORT);
+		for (auto airport : container)
+		{
+			auto name = airport.GetName();
+			auto name2 = runway.GetAirportName();
+			if (!strncmp(name, runway.GetAirportName(), strlen(name)))
+				apt_active_arrival = airport.IsElementActive(false);
+		}
 		for (int i = 0; i < 2; ++i)
 		{
+
 			Runway_Definition rwy;
-			rwy.airport_name = x.GetAirportName();
-			rwy.runway_designator = x.GetRunwayName(i);
+			rwy.active_arrival = runway.IsElementActive(false, i);
+			rwy.active_departure = runway.IsElementActive(true, i);
+			rwy.apt_active_arrival = apt_active_arrival;
+			rwy.airport_name = runway.GetAirportName();
+			rwy.runway_designator = runway.GetRunwayName(i);
 			if (rwy.airport_name.starts_with("EDDM"))
 			{
+				rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 12, Direction::both, rwy.active_arrival, apt_active_arrival));
+				rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 15, Direction::both, rwy.active_arrival, apt_active_arrival));
+				rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 22, Direction::both, rwy.active_arrival, apt_active_arrival));
+				rwy.line_parts.push_back(Line_Definition(1, 1, 14, 0, false, rwy.active_arrival, apt_active_arrival));
 				if (rwy.runway_designator == "08L")
 				{
 					rwy.approach_fix = "MAGAT";
-					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left });
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left));
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left));
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left, rwy.active_arrival, apt_active_arrival });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left, rwy.active_arrival, apt_active_arrival));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left, rwy.active_arrival, apt_active_arrival));
 				}
 				else if (rwy.runway_designator == "08R")
 				{
-					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right });
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right));
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right));
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right, rwy.active_arrival, apt_active_arrival });
+					rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 18, Direction::both, rwy.active_arrival, apt_active_arrival));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right, rwy.active_arrival, apt_active_arrival));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right, rwy.active_arrival, apt_active_arrival));
 					rwy.approach_fix = "BEGEN";
 				}
 				else if (rwy.runway_designator == "26R")
 				{
-					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right });
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right));
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right));
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::right, rwy.active_arrival, apt_active_arrival });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::right, rwy.active_arrival, apt_active_arrival));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::right, rwy.active_arrival, apt_active_arrival));
 					rwy.approach_fix = "GUDEG";
 				}
 				else if (rwy.runway_designator == "26L")
 				{
-					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left });
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left));
-					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left));
+					rwy.ticks.push_back({ 0.5,90,0.5,4,Direction::left, rwy.active_arrival, apt_active_arrival });
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 13.05, Direction::left, rwy.active_arrival, apt_active_arrival));
+					rwy.ticks.push_back(Tick_Definition(0.3, 45, 0, 16.05, Direction::left, rwy.active_arrival, apt_active_arrival));
 					rwy.approach_fix = "NELBI";
 				}
 			}
-			rwy.runway_heading = x.GetRunwayHeading(i);
+			rwy.runway_heading = runway.GetRunwayHeading(i);
 			EuroScopePlugIn::CPosition thr, end;
-			x.GetPosition(&thr, i);
-			x.GetPosition(&end, i == 1 ? 0 : 1);
+			runway.GetPosition(&thr, i);
+			runway.GetPosition(&end, i == 1 ? 0 : 1);
 			rwy.runway_threshold = { thr.m_Latitude, thr.m_Longitude };
 			rwy.runway_end = { end.m_Latitude, end.m_Longitude };
 			Coordinate coord;
@@ -238,14 +261,21 @@ void EsCenterLines::ReadRunways()
 				geo.Inverse(rwy.runway_threshold.latitude, rwy.runway_threshold.longitude, rwy.runway_end.latitude, rwy.runway_end.longitude, azi1, azi2);
 				rwy.runway_heading_calculated = (azi1 + azi2) / 2;
 			}
-			rwy.active_arrival = x.IsElementActive(false, i);
-			rwy.active_departure = x.IsElementActive(true, i);
-			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 12, Direction::both));
-			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 15, Direction::both));
-			rwy.ticks.push_back(Tick_Definition(0.5, 90, 0, 22, Direction::both));
-			rwy.line_parts.push_back(Line_Definition(1, 1, 14, 0, false));
+			if (!rwy.ticks.size())
+				rwy.ticks = default_ticks;
+			for (auto &z : rwy.ticks)
+			{
+				z.apt_active = apt_active_arrival;
+				z.rwy_active = rwy.active_arrival;
+			}
+			if (!rwy.line_parts.size())
+				rwy.line_parts = default_line;
+			for (auto &z : rwy.line_parts)
+			{
+				z.apt_active = apt_active_arrival;
+				z.rwy_active = rwy.active_arrival;
+			}
 			runways.push_back(rwy);
 		}
 	}
 }
-

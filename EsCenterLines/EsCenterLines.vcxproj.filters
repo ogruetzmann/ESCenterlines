@@ -21,21 +21,21 @@
     <ClCompile Include="EsCenterLines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Runway.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EsHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CenterLinesScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EsCenterLines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Runway.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Coordinate.h">
@@ -45,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CenterLinesScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

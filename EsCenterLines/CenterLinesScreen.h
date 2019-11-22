@@ -3,14 +3,17 @@
 #include <Windows.h>
 #include <d2d1.h>
 #include <list>
+#include <functional>
 #include <EuroScopePlugIn.h>
-#include "Runway.h"
+#include "Data.h"
 class CenterLinesScreen :
 	public EuroScopePlugIn::CRadarScreen
 {
 public:
-	CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &ticks);
+	CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &ticks, std::list<CenterLinesScreen*> &screens);
 private:
+	enum class Plugin_Mode{off = 0, runway, airport, on};
+	Plugin_Mode mode = Plugin_Mode::off;
 	D2D1_RENDER_TARGET_PROPERTIES rt_properties = D2D1::RenderTargetProperties(
 		D2D1_RENDER_TARGET_TYPE_DEFAULT,
 		D2D1::PixelFormat(
@@ -26,13 +29,13 @@ private:
 	ID2D1SolidColorBrush *pBlackBrush{ nullptr };
 	std::list<CLine> &lines;
 	std::list<CLine> &ticks;
+	std::list<CenterLinesScreen *> &screens;
 
 	void OnAsrContentLoaded(bool loaded);
 	void OnAsrContentToBeClosed();
 	void OnRefresh(HDC hDC, int phase);
 	bool OnCompileCommand(const char *sCommandLine);
 
-	void DrawRectangle(HDC hDC);
 	void DrawCenterlines(HDC hDC);
 	
 };
