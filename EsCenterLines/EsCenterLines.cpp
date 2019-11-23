@@ -2,7 +2,7 @@
 
 const char *plugin_name{ "EsCenterLines" };
 const char *plugin_version{ "1.2" };
-const char *plugin_author{ "Oliver Grützmann" };
+const char *plugin_author{ "Oliver Grtzmann" };
 const char *plugin_license{ "tbd" };
 
 EsCenterLines::EsCenterLines()
@@ -118,7 +118,6 @@ bool EsCenterLines::GetFixPosition(const std::string &fix, const EuroScopePlugIn
 	SelectActiveSectorfile();
 	for (auto element = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_FIX); element.IsValid(); element = SectorFileElementSelectNext(element, EuroScopePlugIn::SECTOR_ELEMENT_FIX))
 	{ 
-	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_FIX);
 		if (!strcmp(element.GetName(), fix.c_str()))
 		{
 			EuroScopePlugIn::CPosition position;
