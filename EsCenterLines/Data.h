@@ -5,8 +5,9 @@
 
 struct Line_Definition
 {
+	Line_Definition() {}
 	Line_Definition(double line_length, double gap_length, int repeats, double distance_thr, bool starts_with_line, bool rwy_active, bool apt_active)
-		: line_length(line_length), gap_length(gap_length), length(repeats), distance_from_threshold(distance_thr), 
+		: line_length(line_length), gap_length(gap_length), length(repeats), distance_from_threshold(distance_thr),
 		starts_with_line(starts_with_line), rwy_active(rwy_active), apt_active(apt_active) {}
 	double line_length{ 1 };
 	double gap_length{ 1 };
@@ -21,8 +22,9 @@ enum class Direction { both = 0, left, right };
 
 struct Tick_Definition
 {
+	Tick_Definition() {}
 	Tick_Definition(double length, double angle, double distance_cl, double distance_thr, Direction direction, bool rwy_active, bool apt_active)
-		: tick_length(length), tick_angle(angle), tick_distance_from_centerline(distance_cl), tick_distance_from_threshold(distance_thr), 
+		: tick_length(length), tick_angle(angle), tick_distance_from_centerline(distance_cl), tick_distance_from_threshold(distance_thr),
 		tick_direction(direction), rwy_active(rwy_active), apt_active(apt_active) {}
 	double tick_length{ 0.5 };
 	double tick_angle{ 90 };
@@ -68,12 +70,22 @@ struct Line_Settings
 	bool starts_with_line;
 };
 
+struct Special_Settings
+{
+	double distance_cl{ 0 };
+	double distance_thr1{ 0 };
+	double distance_thr2{ 0 };
+	double length{ 0 };
+};
+
 struct Runway_Settings
 {
 	std::string airport;
 	std::string runway;
+	std::string fix;
 	std::list<Line_Settings> lines;
 	std::list<Tick_Settings> ticks;
+	Special_Settings special;
 };
 
 struct Airport_Settings
@@ -81,7 +93,71 @@ struct Airport_Settings
 	std::string airport;
 	std::list<Line_Settings> lines;
 	std::list<Tick_Settings> ticks;
+	std::list<Runway_Settings> runways;
 };
 
 static std::list<Tick_Definition> default_ticks{ {0.5, 90, 0.5, 4, Direction::both, false, false}, {0.5, 90, 0, 10, Direction::both, false, false}, {0.5, 90, 0, 20, Direction::both, false, false} };
 static std::list<Line_Definition> default_line{ {1, 1, 10, 0, false, false, false} };
+
+
+struct EDDM
+{
+	Airport_Settings get()
+	{
+		Airport_Settings eddm;
+		eddm.airport = "EDDM";
+
+		Line_Settings eddm_lines;
+		eddm_lines.distance_thr = 0;
+		eddm_lines.length_gap = 1;
+		eddm_lines.length_line = 1;
+		eddm_lines.repeats = 14;
+		eddm_lines.starts_with_line = false;
+		eddm.lines.push_back(eddm_lines);
+
+		Runway_Settings eddm_26r;
+		eddm_26r.airport = "EDDM";
+		eddm_26r.fix = "GUDEG";
+		eddm_26r.runway = "26R";
+		eddm_26r.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::right });
+		eddm_26r.ticks.push_back({ 0.5, 90, 0, 12, Direction::both });
+		eddm_26r.ticks.push_back({ 0.5, 90, 0, 15, Direction::both });
+		eddm_26r.ticks.push_back({ 0.5, 90, 0, 22, Direction::both });
+		eddm.runways.push_back(eddm_26r);
+
+		Runway_Settings eddm_26l;
+		eddm_26l.airport = "EDDM";
+		eddm_26l.fix = "NELBI";
+		eddm_26l.runway = "26L";
+		eddm_26l.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::left });
+		eddm_26l.ticks.push_back({ 0.5, 90, 0, 12, Direction::both });
+		eddm_26l.ticks.push_back({ 0.5, 90, 0, 15, Direction::both });
+		eddm_26l.ticks.push_back({ 0.5, 90, 0, 22, Direction::both });
+		eddm.runways.push_back(eddm_26l);
+
+		Runway_Settings eddm_08l;
+		eddm_08l.airport = "EDDM";
+		eddm_08l.fix = "MAGAT";
+		eddm_08l.runway = "08L";
+		eddm_08l.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::left });
+		eddm_08l.ticks.push_back({ 0.5, 90, 0, 12, Direction::both });
+		eddm_08l.ticks.push_back({ 0.5, 90, 0, 15, Direction::both });
+		eddm_08l.ticks.push_back({ 0.5, 90, 0, 22, Direction::both });
+		eddm.runways.push_back(eddm_08l);
+
+		Runway_Settings eddm_08r;
+		eddm_08r.airport = "EDDM";
+		eddm_08r.fix = "BEGEN";
+		eddm_08r.runway = "08R";
+		eddm_08r.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::right });
+		eddm_08r.ticks.push_back({ 0.5, 90, 0, 12, Direction::both });
+		eddm_08r.ticks.push_back({ 0.5, 90, 0, 15, Direction::both });
+		eddm_08r.ticks.push_back({ 0.5, 90, 0, 18, Direction::both });
+		eddm_08r.ticks.push_back({ 0.5, 90, 0, 22, Direction::both });
+		eddm.runways.push_back(eddm_08r);
+
+		return eddm;
+	}
+};
+
+static EDDM eddm;
