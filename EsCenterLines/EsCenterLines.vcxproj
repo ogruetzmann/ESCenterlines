@@ -145,6 +145,10 @@
       <AdditionalIncludeDirectories>C:\GeographicLib-1.50\include;C:\Program Files %28x86%29\EuroScope\PlugInEnvironment;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessorDefinitions>GEOGRAPHICLIB_SHARED_LIB=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

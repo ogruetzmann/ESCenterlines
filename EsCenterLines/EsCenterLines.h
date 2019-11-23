@@ -1,6 +1,7 @@
 #pragma once
 #include <list>
 #include <string>
+#include <algorithm>
 #include <EuroScopePlugIn.h>
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/GeodesicLine.hpp>
@@ -24,12 +25,15 @@ private:
 
 	EuroScopePlugIn::CRadarScreen *OnRadarScreenCreated(const char *sDisplayName, bool NeedRadarContent, bool GeoReferenced, bool CanBeSaved, bool CanBeCreated);
 	void OnAirportRunwayActivityChanged();
-	void CalculateCenterlines();
-	void CalculateLine(std::list<Line_Definition> &ld, Coordinate &threshold, double track);
-	void CalculateTicks(std::list<Tick_Definition> &td, Coordinate &threshold, double track);
-	void CalculateMunichSpecial(const Runway_Definition &rd);
-	bool GetFixPosition(Coordinate &coord, const Runway_Definition &rwy);
+	void CalculateLine(Runway_Definition &rd, bool apt_act, bool rwy_act);
+	void CalculateSpecial(Runway_Definition &rd, bool apt_act, bool rwy_act);
+	void CalculateTicks(Runway_Definition &rd, bool apt_act, bool rwy_act);
+	bool GetFixPosition(const std::string &fix, const EuroScopePlugIn::CPosition &threshold, Coordinate &coord);
+	bool GetRunwaySettings(const std::string &airport, const std::string &runway, Runway_Settings &rws);
+
+	bool IsAirportActive(const std::string &airport);
 	double NauticalMiles(double meters);
 	void ReadRunways();
 };
+
 
