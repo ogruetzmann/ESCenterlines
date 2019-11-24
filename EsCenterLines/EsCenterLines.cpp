@@ -5,7 +5,7 @@ const char *plugin_name{ "EsCenterLines-EDDM" };
 #else
 const char *plugin_name{ "EsCenterLines" };
 #endif
-const char *plugin_version{ "1.3" };
+const char *plugin_version{ "1.31" };
 const char *plugin_author{ "Oliver Grtzmann" };
 const char *plugin_license{ "GPL v3" };
 
@@ -13,7 +13,7 @@ EsCenterLines::EsCenterLines()
 	: EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, plugin_name, plugin_version, plugin_author, plugin_license)
 {
 	ReadRunways();
-	EuroScopePlugIn::CPlugIn::RegisterDisplayType("Center Lines", false, true, false, false);
+	EuroScopePlugIn::CPlugIn::RegisterDisplayType("ES CenterLines", false, true, false, false);
 }
 
 EsCenterLines::~EsCenterLines()
