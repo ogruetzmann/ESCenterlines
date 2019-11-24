@@ -47,6 +47,11 @@ void CenterLinesScreen::OnRefresh(HDC hDC, int phase)
 {
 	if (phase == EuroScopePlugIn::REFRESH_PHASE_BACK_BITMAP)
 	{
+		if (!initialized)
+		{
+			RefreshMapContent();
+			initialized = true;
+		}
 		DrawCenterlines(hDC);
 	}
 }

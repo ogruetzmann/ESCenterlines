@@ -12,6 +12,7 @@ class CenterLinesScreen :
 public:
 	CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &ticks, std::list<CenterLinesScreen*> &screens);
 private:
+	bool initialized{ false };
 	enum class Plugin_Mode{off = 0, runway, airport, on};
 	Plugin_Mode mode = Plugin_Mode::off;
 	D2D1_RENDER_TARGET_PROPERTIES rt_properties = D2D1::RenderTargetProperties(

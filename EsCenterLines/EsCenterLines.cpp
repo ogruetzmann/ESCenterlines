@@ -1,9 +1,9 @@
 #include "EsCenterLines.h"
 
 const char *plugin_name{ "EsCenterLines" };
-const char *plugin_version{ "1.2" };
+const char *plugin_version{ "1.3" };
 const char *plugin_author{ "Oliver Grtzmann" };
-const char *plugin_license{ "tbd" };
+const char *plugin_license{ "GPL v3" };
 
 EsCenterLines::EsCenterLines()
 	: EuroScopePlugIn::CPlugIn(EuroScopePlugIn::COMPATIBILITY_CODE, plugin_name, plugin_version, plugin_author, plugin_license)
@@ -116,7 +116,9 @@ void EsCenterLines::CalculateTicks(Runway_Definition &rd, bool apt_act, bool rwy
 bool EsCenterLines::GetFixPosition(const std::string &fix, const EuroScopePlugIn::CPosition &threshold, Coordinate &coord)
 {
 	SelectActiveSectorfile();
-	for (auto element = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_FIX); element.IsValid(); element = SectorFileElementSelectNext(element, EuroScopePlugIn::SECTOR_ELEMENT_FIX))
+	for (auto element = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_FIX); 
+		element.IsValid(); 
+		element = SectorFileElementSelectNext(element, EuroScopePlugIn::SECTOR_ELEMENT_FIX))
 	{ 
 		if (!strcmp(element.GetName(), fix.c_str()))
 		{
@@ -168,17 +170,14 @@ bool EsCenterLines::IsAirportActive(const std::string &airport)
 	return false;
 }
 
-double EsCenterLines::NauticalMiles(double nm)
-{
-	return nm * GeographicLib::Constants::nauticalmile();
-}
-
 void EsCenterLines::ReadRunways()
 {
 	lines.clear();
 	ticks.clear();
 	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
-	for (auto runway = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY); runway.IsValid(); runway = SectorFileElementSelectNext(runway, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
+	for (auto runway = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY); 
+		runway.IsValid(); 
+		runway = SectorFileElementSelectNext(runway, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
 	{
 		for (int i = 0; i < 2; ++i)
 		{

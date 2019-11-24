@@ -32,7 +32,7 @@ private:
 	bool GetRunwaySettings(const std::string &airport, const std::string &runway, Runway_Settings &rws);
 
 	bool IsAirportActive(const std::string &airport);
-	double NauticalMiles(double meters);
+	inline double NauticalMiles(double nm) { return nm * GeographicLib::Constants::nauticalmile(); }
 	void ReadRunways();
 };
 
