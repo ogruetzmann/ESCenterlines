@@ -185,6 +185,7 @@ struct ZZZZ
 	Airport_Settings get()
 	{
 		Airport_Settings zzzz;
+#ifndef __EDDM
 		Line_Settings zzzz_line;
 		zzzz_line.distance_thr = 0;
 		zzzz_line.length_gap = 1;
@@ -192,11 +193,10 @@ struct ZZZZ
 		zzzz_line.repeats = 10;
 		zzzz_line.starts_with_line = false;
 		zzzz.lines.push_back(zzzz_line);
-
 		zzzz.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::both });
 		zzzz.ticks.push_back({ 0.5, 90, 0.5, 10, Direction::both });
 		zzzz.ticks.push_back({ 0.5, 90, 0.5, 20, Direction::both });
-
+#endif
 		return zzzz;
 	}
 };
