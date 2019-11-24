@@ -1,6 +1,10 @@
 #include "EsCenterLines.h"
 
+#ifdef __EDDM
+const char *plugin_name{ "EsCenterLines-EDDM" };
+#else
 const char *plugin_name{ "EsCenterLines" };
+#endif
 const char *plugin_version{ "1.3" };
 const char *plugin_author{ "Oliver Grtzmann" };
 const char *plugin_license{ "GPL v3" };
