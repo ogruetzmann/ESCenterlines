@@ -16,12 +16,12 @@ CenterLinesScreen::CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &
 void CenterLinesScreen::OnAsrContentLoaded(bool loaded)
 {
 	if (!loaded)
-		mode = Plugin_Mode::off;
+		mode = Plugin_Mode::airport;
 	else
 	{
 		auto str = GetDataFromAsr("Active");
 		if (str == nullptr)
-			mode = Plugin_Mode::off;
+			mode = Plugin_Mode::airport;
 		else
 		{
 			if (!strcmp("0", str))
