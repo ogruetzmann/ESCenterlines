@@ -178,7 +178,7 @@ void EsCenterLines::ReadRunways()
 	lines.clear();
 	ticks.clear();
 	SectorContainer container(this, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY);
-	for (auto runway : container)
+	for (auto runway = SectorFileElementSelectFirst(EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY); runway.IsValid(); runway = SectorFileElementSelectNext(runway, EuroScopePlugIn::SECTOR_ELEMENT_RUNWAY))
 	{
 		for (int i = 0; i < 2; ++i)
 		{
@@ -190,8 +190,8 @@ void EsCenterLines::ReadRunways()
 			
 			if (!GetRunwaySettings(rwy.airport_name, rwy.runway_designator, rwy.runway_settings))
 			{
-				//get default
-				int i = 0;
+				rwy.runway_settings.lines = zzzz.get().lines;
+				rwy.runway_settings.ticks = zzzz.get().ticks;
 			}
 			Coordinate coord;
 			EuroScopePlugIn::CPosition threshold, end;

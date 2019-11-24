@@ -20,7 +20,7 @@ void CenterLinesScreen::OnAsrContentLoaded(bool loaded)
 	else
 	{
 		auto str = GetDataFromAsr("Active");
-		if (str == NULL)
+		if (str == nullptr)
 			mode = Plugin_Mode::off;
 		else
 		{

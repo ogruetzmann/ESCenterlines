@@ -156,7 +156,6 @@ struct EDDM
 		eddm_08l.ticks.push_back({ 0.3, 45, 0, 16.05, Direction::left });
 		eddm.runways.push_back(eddm_08l);
 
-
 		Special_Settings spc_08r;
 		spc_08r.distance_cl = 1.755;
 		spc_08r.distance_thr1 = 13.05;
@@ -181,7 +180,29 @@ struct EDDM
 	}
 };
 
+struct ZZZZ
+{
+	Airport_Settings get()
+	{
+		Airport_Settings zzzz;
+		Line_Settings zzzz_line;
+		zzzz_line.distance_thr = 0;
+		zzzz_line.length_gap = 1;
+		zzzz_line.length_line = 1;
+		zzzz_line.repeats = 10;
+		zzzz_line.starts_with_line = false;
+		zzzz.lines.push_back(zzzz_line);
+
+		zzzz.ticks.push_back({ 0.5, 90, 0.5, 4, Direction::both });
+		zzzz.ticks.push_back({ 0.5, 90, 0.5, 10, Direction::both });
+		zzzz.ticks.push_back({ 0.5, 90, 0.5, 20, Direction::both });
+
+		return zzzz;
+	}
+};
+
 static EDDM eddm;
+static ZZZZ zzzz;
 
 struct Settings
 {
