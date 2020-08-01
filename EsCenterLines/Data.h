@@ -180,6 +180,70 @@ struct EDDM
 	}
 };
 
+struct EDMA
+{
+	Airport_Settings get()
+	{
+		Airport_Settings edma;
+		edma.airport = "EDMA";
+
+		Line_Settings lines;
+		lines.distance_thr = 0;
+		lines.length_gap = 1;
+		lines.length_line = 1;
+		lines.repeats = 6;
+		lines.starts_with_line = false;
+		edma.lines.push_back(lines);
+
+		Runway_Settings edma_25;
+		edma_25.fix = "BUREG";
+		edma_25.runway = "25";
+		edma_25.ticks.push_back({ 0.5, 90, 0.5, 6.1, Direction::both });
+		edma_25.ticks.push_back({ 0.5, 90, 0.5, 10, Direction::both });
+		edma.runways.push_back(edma_25);
+
+		Runway_Settings edma_07;
+		edma_07.fix = "ABUSI";
+		edma_07.runway = "07";
+		edma_07.ticks.push_back({ 0.5, 90, 0.5, 7.1, Direction::both });
+		edma_07.ticks.push_back({ 0.5, 90, 0.5, 10, Direction::both });
+		edma.runways.push_back(edma_07);
+
+		return edma;
+	}
+};
+
+struct EDMO
+{
+	Airport_Settings get()
+	{
+		Airport_Settings edmo;
+		edmo.airport = "EDMO";
+
+		Line_Settings lines;
+		lines.distance_thr = 0;
+		lines.length_gap = 1;
+		lines.length_line = 1;
+		lines.repeats = 5;
+		lines.starts_with_line = false;
+		edmo.lines.push_back(lines);
+
+		Runway_Settings edmo_22;
+		edmo_22.fix = "EDIMO";
+		edmo_22.runway = "22";
+		edmo_22.ticks.push_back({ 0.5, 90, 0.5, 7.4, Direction::both });
+		edmo_22.ticks.push_back({ 0.5, 90, 0.5, 10, Direction::both });
+		edmo.runways.push_back(edmo_22);
+
+		Runway_Settings edmo_04;
+		edmo_04.runway = "04";
+		edmo_04.lines.push_back(Line_Settings{ 0 });
+		edmo.runways.push_back(edmo_04);
+
+		return edmo;
+	}
+};
+
 struct ZZZZ
 {
 	Airport_Settings get()
@@ -202,10 +266,17 @@ struct ZZZZ
 };
 
 static EDDM eddm;
+static EDMA edma;
+static EDMO edmo;
 static ZZZZ zzzz;
 
 struct Settings
 {
-	Settings() { apts.push_back(eddm.get()); }
+	Settings() 
+	{ 
+		apts.push_back(eddm.get());
+		apts.push_back(edma.get());
+		apts.push_back(edmo.get());
+	}
 	std::list<Airport_Settings> apts;
 };

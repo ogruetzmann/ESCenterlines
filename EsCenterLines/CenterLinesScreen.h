@@ -6,6 +6,7 @@
 #include <functional>
 #include <EuroScopePlugIn.h>
 #include "Data.h"
+#include "ColorPicker.h"
 class CenterLinesScreen :
 	public EuroScopePlugIn::CRadarScreen
 {

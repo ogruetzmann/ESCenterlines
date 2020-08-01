@@ -211,6 +211,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CenterLinesScreen.cpp" />
+    <ClCompile Include="ColorPicker.cpp" />
     <ClCompile Include="EsCenterLines.cpp" />
     <ClCompile Include="EsHelpers.cpp" />
     <ClCompile Include="PluginMain.cpp" />
@@ -218,7 +219,9 @@
     <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\Program Files (x86)\EuroScope\PlugInEnvironment\EuroScopePlugIn.h" />
     <ClInclude Include="CenterLinesScreen.h" />
+    <ClInclude Include="ColorPicker.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="EsCenterLines.h" />
     <ClInclude Include="EsHelpers.h" />

@@ -42,7 +42,7 @@ void EsCenterLines::OnAirportRunwayActivityChanged()
 void EsCenterLines::CalculateLine(Runway_Definition &rd, bool apt_act, bool rwy_act)
 {
 	double gl, ll, glll, dist;
-	auto gd_line = geo.Line(rd.runway_threshold.latitude, rd.runway_threshold.longitude, rd.runway_heading_calculated - 180);
+	auto gd_line = geo.Line(rd.runway_threshold.m_Latitude, rd.runway_threshold.m_Longitude, rd.runway_heading_calculated - 180);
 	for (auto centerlines : rd.runway_settings.lines)
 	{
 		gl = NauticalMiles(centerlines.length_gap);
@@ -126,12 +126,9 @@ bool EsCenterLines::GetFixPosition(const std::string &fix, const EuroScopePlugIn
 	{ 
 		if (!strcmp(element.GetName(), fix.c_str()))
 		{
-			EuroScopePlugIn::CPosition position;
-			element.GetPosition(&position, 0);
-			if (position.DistanceTo(threshold) > 30)
+			element.GetPosition(&coord, 0);
+			if (coord.DistanceTo(threshold) > 30)
 				continue;
-			coord.latitude = position.m_Latitude;
-			coord.longitude = position.m_Longitude;
 			return true;
 		}
 	}

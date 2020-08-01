@@ -6,9 +6,9 @@ CenterLinesScreen::CenterLinesScreen(std::list<CLine> &lines, std::list<CLine> &
 	auto hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
 	hr = pD2DFactory->CreateDCRenderTarget(&rt_properties, &render_target);
 	D2D1_COLOR_F clcolor;
-	clcolor.r = float(180) / float(255);
-	clcolor.g = float(180) / float(255);
-	clcolor.b = float(180) / float(255);
+	clcolor.r = float(78) / float(255);
+	clcolor.g = float(62) / float(255);
+	clcolor.b = float(52) / float(255);
 	clcolor.a = 1;
 	render_target->CreateSolidColorBrush(clcolor, &pBlackBrush);
 }
@@ -89,6 +89,17 @@ bool CenterLinesScreen::OnCompileCommand(const char *sCommandLine)
 		RefreshMapContent();
 		return true;
 	}
+	if (!strcmp(".esclines color", sCommandLine))
+	{
+		ColorPicker cp;
+		D2D1_COLOR_F clcolor = pBlackBrush->GetColor();
+		if (cp.Picker(clcolor))
+		{
+			render_target->CreateSolidColorBrush(clcolor, &pBlackBrush);
+			RefreshMapContent();
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -107,8 +118,8 @@ void CenterLinesScreen::DrawCenterlines(HDC hDC)
 	{
 		if (mode == Plugin_Mode::runway && !x.rwy || mode == Plugin_Mode::airport && !x.apt)
 			continue;
-		auto start = ConvertCoordFromPositionToPixel(x.start.cposition());
-		auto end = ConvertCoordFromPositionToPixel(x.end.cposition());
+		auto start = ConvertCoordFromPositionToPixel(x.start);
+		auto end = ConvertCoordFromPositionToPixel(x.end);
 		render_target->DrawLine({ float(start.x), float(start.y) }, { float(end.x), float(end.y) }, pBlackBrush, 1);
 	}
 
@@ -116,9 +127,10 @@ void CenterLinesScreen::DrawCenterlines(HDC hDC)
 	{
 		if (mode == Plugin_Mode::runway && !x.rwy || mode == Plugin_Mode::airport && !x.apt)
 			continue;
-		auto start = ConvertCoordFromPositionToPixel(x.start.cposition());
-		auto end = ConvertCoordFromPositionToPixel(x.end.cposition());
+		auto start = ConvertCoordFromPositionToPixel(x.start);
+		auto end = ConvertCoordFromPositionToPixel(x.end);
 		render_target->DrawLine({ float(start.x), float(start.y) }, { float(end.x), float(end.y) }, pBlackBrush, 1);
 	}
 	render_target->EndDraw();
+	//render_target->Release();
 }

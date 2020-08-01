@@ -1,16 +1,22 @@
 #pragma once
 #include <EuroScopePlugIn.h>
 struct Coordinate
+	: public EuroScopePlugIn::CPosition
 {
-	double latitude;
-	double longitude;
-	EuroScopePlugIn::CPosition cposition() 
+	Coordinate() {};
+	Coordinate(double lat, double lon)
 	{
-		EuroScopePlugIn::CPosition pos;
-		pos.m_Latitude = latitude;
-		pos.m_Longitude = longitude;
-		return pos;
+		m_Latitude = lat;
+		m_Longitude = lon;
 	}
+	double &latitude = m_Latitude;
+	double &longitude = m_Longitude;
+};
+
+struct Coordinate2
+	: public EuroScopePlugIn::CPosition
+{
+
 };
 
 struct CLine
@@ -20,4 +26,3 @@ struct CLine
 	bool apt{ false };
 	bool rwy{ false };
 };
-
