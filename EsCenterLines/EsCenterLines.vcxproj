@@ -226,7 +226,11 @@
     <ClInclude Include="EsHelpers.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="EuroScopePlugIn.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Settings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EsCenterLines.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
