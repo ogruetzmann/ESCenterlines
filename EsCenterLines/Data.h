@@ -29,7 +29,7 @@ struct Special_Settings
 	double distance_thr1{ 0 };
 	double distance_thr2{ 0 };
 	double length{ 0 };
-	Direction direction;
+	Direction direction{ 0 };
 };
 
 struct Runway_Settings
@@ -270,9 +270,9 @@ static EDMA edma;
 static EDMO edmo;
 static ZZZZ zzzz;
 
-struct Settings
+struct Data
 {
-	Settings() 
+	Data() 
 	{ 
 		apts.push_back(eddm.get());
 		apts.push_back(edma.get());

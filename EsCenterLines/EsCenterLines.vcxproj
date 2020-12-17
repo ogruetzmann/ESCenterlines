@@ -219,13 +219,13 @@
     <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Program Files (x86)\EuroScope\PlugInEnvironment\EuroScopePlugIn.h" />
     <ClInclude Include="CenterLinesScreen.h" />
     <ClInclude Include="ColorPicker.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="EsCenterLines.h" />
     <ClInclude Include="EsHelpers.h" />
     <ClInclude Include="Data.h" />
+    <ClInclude Include="EuroScopePlugIn.h" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

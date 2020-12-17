@@ -3,10 +3,12 @@
 #include <Windows.h>
 #include <d2d1.h>
 #include <list>
-#include <functional>
+//#include <functional>
+#include <exception>
 #include "EuroScopePlugIn.h"
 #include "Data.h"
 #include "ColorPicker.h"
+#include "Settings.h"
 class CenterLinesScreen :
 	public EuroScopePlugIn::CRadarScreen
 {
@@ -16,6 +18,7 @@ private:
 	bool initialized{ false };
 	enum class Plugin_Mode{off = 0, runway, airport, on};
 	Plugin_Mode mode = Plugin_Mode::off;
+	D2D1_COLOR_F clcolor{ 180, 180, 180, 1 };
 	D2D1_RENDER_TARGET_PROPERTIES rt_properties = D2D1::RenderTargetProperties(
 		D2D1_RENDER_TARGET_TYPE_DEFAULT,
 		D2D1::PixelFormat(
@@ -33,6 +36,7 @@ private:
 	std::list<CLine> &ticks;
 	std::list<CenterLinesScreen *> &screens;
 
+	void LoadColorSettings();
 	void OnAsrContentLoaded(bool loaded);
 	void OnAsrContentToBeClosed();
 	void OnRefresh(HDC hDC, int phase);

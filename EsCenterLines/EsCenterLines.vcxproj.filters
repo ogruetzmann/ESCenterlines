@@ -56,10 +56,10 @@
     <ClInclude Include="Settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Program Files (x86)\EuroScope\PlugInEnvironment\EuroScopePlugIn.h">
+    <ClInclude Include="ColorPicker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ColorPicker.h">
+    <ClInclude Include="EuroScopePlugIn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

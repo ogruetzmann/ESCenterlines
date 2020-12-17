@@ -43,7 +43,7 @@ void EsCenterLines::CalculateLine(Runway_Definition &rd, bool apt_act, bool rwy_
 {
 	double gl, ll, glll, dist;
 	auto gd_line = geo.Line(rd.runway_threshold.m_Latitude, rd.runway_threshold.m_Longitude, rd.runway_heading_calculated - 180);
-	for (auto centerlines : rd.runway_settings.lines)
+	for (auto &centerlines : rd.runway_settings.lines)
 	{
 		gl = NauticalMiles(centerlines.length_gap);
 		ll = NauticalMiles(centerlines.length_line);
@@ -89,7 +89,7 @@ void EsCenterLines::CalculateTicks(Runway_Definition &rd, bool apt_act, bool rwy
 {
 	double dist_thr, dist_cl, length;
 	auto gd_line = geo.Line(rd.runway_threshold.latitude, rd.runway_threshold.longitude, rd.runway_heading_calculated - 180);
-	for (auto rangeticks : rd.runway_settings.ticks)
+	for (auto &rangeticks : rd.runway_settings.ticks)
 	{
 		dist_thr = NauticalMiles(rangeticks.distance_thr);
 		dist_cl = NauticalMiles(rangeticks.distance_cl);
@@ -137,7 +137,7 @@ bool EsCenterLines::GetFixPosition(const std::string &fix, const EuroScopePlugIn
 
 bool EsCenterLines::GetRunwaySettings(const std::string &airport, const std::string &runway, Runway_Settings &rws)
 {
-	Settings set;
+	Data set;
 	for (auto apt : set.apts)
 	{
 		if (airport.starts_with(apt.airport))
