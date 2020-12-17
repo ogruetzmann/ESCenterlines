@@ -1,5 +1,5 @@
 #pragma once
-#include <EuroScopePlugIn.h>
+#include "EuroScopePlugIn.h"
 struct Coordinate
 	: public EuroScopePlugIn::CPosition
 {

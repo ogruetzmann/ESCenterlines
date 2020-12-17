@@ -2,7 +2,7 @@
 #include <list>
 #include <string>
 #include <algorithm>
-#include <EuroScopePlugIn.h>
+#include "EuroScopePlugIn.h"
 #include <GeographicLib/Geodesic.hpp>
 #include <GeographicLib/GeodesicLine.hpp>
 #include <GeographicLib/Math.hpp>

@@ -1,4 +1,4 @@
-#include <EuroScopePlugIn.h>
+#include "EuroScopePlugIn.h"
 #include "EsCenterLines.h"
 
 EuroScopePlugIn::CPlugIn *pPlugin{ nullptr };

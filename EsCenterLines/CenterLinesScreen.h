@@ -4,7 +4,7 @@
 #include <d2d1.h>
 #include <list>
 #include <functional>
-#include <EuroScopePlugIn.h>
+#include "EuroScopePlugIn.h"
 #include "Data.h"
 #include "ColorPicker.h"
 class CenterLinesScreen :
