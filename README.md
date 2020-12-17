@@ -2,7 +2,8 @@
 Plugin to display extended centerlines in Euroscope, currently no too smart.
 
 ### Installation
-Put the dll file somewhere, load it in EuroScope and allow it to draw on desired display types (open ASRs need to be reopened for this to have any effect)
+Put the dll file somewhere, load it in EuroScope and allow it to draw on desired display types (open ASRs need to be reopened for this to have any effect).
+EsCenterLines-EDDM.dll is a special version for EDDM (surprisingly)
 
 ### Display
 - .esclines off - no lines are displayed
@@ -12,3 +13,4 @@ Put the dll file somewhere, load it in EuroScope and allow it to draw on desired
 
 ### Color
 - .esclines color - opens a colorpicker. This setting is not active in all ASRs immediately, ASRs need to be reloaded.
+
